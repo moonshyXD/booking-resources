@@ -2,7 +2,7 @@ from dataclasses import asdict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from domain.user import User
+from domain.models.user import User
 from repository.models.user import UserDB
 
 

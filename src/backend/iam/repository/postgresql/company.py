@@ -2,7 +2,7 @@ from dataclasses import asdict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from domain.company import Company
+from domain.models.company import Company
 from repository.models.company import CompanyDB
 
 

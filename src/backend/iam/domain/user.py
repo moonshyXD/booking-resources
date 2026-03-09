@@ -1,23 +1,28 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from datetime import time
+from datetime import datetime
 from typing import Protocol
 
 
 @dataclass
 class User:
-    id: int
     company_id: int
     email: str
     password_hash: str
-    first_name: str
-    second_name: str
-    role: str
-    is_active: bool
-    created_at: time
+
+    id: int | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    telegram_username: str | None = None
+    avatar_url: str | None = None
+    role: str = "USER"
+    is_active: bool = True
+    created_at: datetime | None = None
 
 
 class UserRepositoryI(Protocol):
-    def get_user(self, user: User): ...
-    def add_user(self, user: User): ...
-    def delete_user(self, user: User): ...
-    def update_user(self, user: User, new_user: User): ...
+    def get_user_by_id(self, user_id: int) -> User | None: ...
+    def add_user(self, user: User) -> User: ...
+    def delete_user(self, user: User) -> None: ...
+    def update_user(self, user_id: int, new_user: User) -> User: ...

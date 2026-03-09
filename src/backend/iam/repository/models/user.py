@@ -1,20 +1,17 @@
-from sqlalchemy.orm import declarative_base
 from sqlalchemy import (
-    Column,
-    Integer,
-    String,
     Boolean,
+    Column,
     DateTime,
     ForeignKey,
+    Integer,
+    String,
     UniqueConstraint,
 )
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.sql import func
 
 
-Base = declarative_base()
-
-
-class UserDB(Base):
+class UserDB(DeclarativeBase):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)

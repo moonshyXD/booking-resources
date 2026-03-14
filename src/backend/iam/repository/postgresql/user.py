@@ -1,9 +1,8 @@
 from dataclasses import asdict
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from domain.models.user import User
 from repository.models.user import UserDB
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class UserRepositoryPostgres:
@@ -29,7 +28,7 @@ class UserRepositoryPostgres:
         return self._to_entity(new_user_db)
 
     async def update_user_by_id(
-        self, user_id: int, new_user: User
+            self, user_id: int, new_user: User
     ) -> User | None:
         user_db = await self.session.get(UserDB, user_id)
 

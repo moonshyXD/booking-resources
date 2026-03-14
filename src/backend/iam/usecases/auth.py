@@ -8,7 +8,7 @@ FAKE_DB = {
 
 class AuthService:
     def __init__(
-        self, hasher: PasswordHasherI, token_provider: TokenProviderI
+            self, hasher: PasswordHasherI, token_provider: TokenProviderI
     ):
         self.hasher = hasher
         self.token_provider = token_provider
@@ -26,7 +26,7 @@ class AuthService:
         hashed_password = FAKE_DB.get(username)
         print(self.hasher.verify_password(password, hashed_password))
         if not hashed_password or not self.hasher.verify_password(
-            password, hashed_password
+                password, hashed_password
         ):
             return None
 

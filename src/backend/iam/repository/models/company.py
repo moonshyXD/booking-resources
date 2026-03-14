@@ -1,9 +1,9 @@
+from models.base import Base
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.sql import func
 
 
-class CompanyDB(DeclarativeBase):
+class CompanyDB(Base):
     __tablename__ = "companies"
 
     id = Column(Integer, primary_key=True)

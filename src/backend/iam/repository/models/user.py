@@ -1,3 +1,4 @@
+from models.base import Base
 from sqlalchemy import (
     Boolean,
     Column,
@@ -7,11 +8,10 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
-from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.sql import func
 
 
-class UserDB(DeclarativeBase):
+class UserDB(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)

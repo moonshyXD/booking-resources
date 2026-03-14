@@ -1,9 +1,8 @@
 from dataclasses import asdict
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from domain.models.company import Company
 from repository.models.company import CompanyDB
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class CompanyRepositoryPostgres:
@@ -24,7 +23,7 @@ class CompanyRepositoryPostgres:
         return self._to_entity(company_db)
 
     async def update_company_by_id(
-        self, company_id: int, new_company: Company
+            self, company_id: int, new_company: Company
     ) -> Company | None:
         company_db = await self.session.get(CompanyDB, company_id)
         if company_db is None:

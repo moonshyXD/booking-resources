@@ -1,0 +1,149 @@
+services:
+  postgres:
+    image: postgres:13.3
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/var/lib/redis/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: >
+      sh -c '
+        mkdir -p /usr/local/etc/redis &&
+        echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+  iam:
+    container_name: iam
+    build:
+      dockerfile: ./Dockerfile
+      context: ./backend/iam
+    ports:
+      - "8006:8012"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - API_URL_IAM=${API_URL_IAM}
+
+  catalog:
+    container_name: catalog
+    build:
+      dockerfile: ./Dockerfile
+      context: ./backend/catalog
+    ports:
+      - "8007:8013"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - API_URL_CATALOG=${API_URL_CATALOG}
+
+  booking:
+    container_name: booking
+    build:
+      dockerfile: ./Dockerfile
+      context: ./backend/booking
+    ports:
+      - "8008:8014"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - API_URL_BOOKING=${API_URL_BOOKING}
+
+  analytics:
+    container_name: analytics
+    build:
+      dockerfile: ./Dockerfile
+      context: ./backend/analytics
+    ports:
+      - "8009:8015"
+    depends_on:
+      - iam
+      - catalog
+      - booking
+    environment:
+      - API_URL_ANALYTICS=${API_URL_ANALYTICS}
+
+  notifications:
+    container_name: notifications
+    build:
+      dockerfile: ./Dockerfile
+      context: ./backend/notifications
+    ports:
+      - "8010:8011"
+    depends_on:
+      - iam
+      - catalog
+      - booking
+    environment:
+      - API_URL_NOTIFICATIONS=${API_URL_NOTIFICATIONS}
+
+  frontend:
+    container_name: frontend
+    build:
+      dockerfile: ./Dockerfile
+      context: ./frontend
+    ports:
+      - "8001:5173"
+    depends_on:
+      - notifications
+    environment:
+      - API_URL_FRONTEND=${API_URL_FRONTEND}
+
+  
+
+volumes:
+  postgres_data:
+  redis_data:
+
+  

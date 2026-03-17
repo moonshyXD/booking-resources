@@ -1,8 +1,10 @@
 from dataclasses import asdict
+from typing import Any, Coroutine
 
 from domain.models.user import User
 from repository.models.user import UserDB
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, Result
 
 
 class UserRepositoryPostgres:
@@ -19,6 +21,10 @@ class UserRepositoryPostgres:
 
     async def add_user(self, user: User) -> User:
         user_data = self._validate_user_data(user)
+
+        email = self.session.get(user.email)
+        if email is not None:
+            return None
 
         new_user_db = UserDB(**user_data)
 
@@ -50,10 +56,23 @@ class UserRepositoryPostgres:
         if user_db is None:
             return None
 
-        self.session.delete(user_db)
+        await self.session.delete(user_db)
         await self.session.flush()
 
         return self._to_entity(user_db)
+
+    async def get_id_by_email(self, email: str) -> int:
+        stmt = select(UserDB.id).where(UserDB.email == email)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_password_by_id(self, user_id: int) -> str | None:
+        user_db = await self.session.get(UserDB, user_id)
+        if user_db is None:
+            return None
+
+        password = user_db.email
+        return password
 
     @staticmethod
     def _validate_user_data(user: User) -> dict:

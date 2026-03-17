@@ -1,7 +1,36 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Self
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, TomlConfigSettingsSource
+
+from adapters.config.env_config import DatabaseConfig, IamConfig, JWTConfig
+from adapters.config.toml_config import FastapiConfig, RedisConfig
 
 
-class ConfigBase(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file="settings/.env", env_file_encoding="utf-8", extra="ignore"
-    )
+class Config(BaseSettings):
+    db: DatabaseConfig = Field(default_factory=DatabaseConfig)
+    iam: IamConfig = Field(default_factory=IamConfig)
+    jwt: JWTConfig = Field(default_factory=JWTConfig)
+    redis: RedisConfig
+    fastapi: FastapiConfig
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls,
+        init_settings,
+        env_settings,
+        dotenv_settings,
+        file_secret_settings,
+    ):
+        return (
+            init_settings,
+            env_settings,
+            dotenv_settings,
+            TomlConfigSettingsSource(settings_cls, "settings/config.toml"),
+            file_secret_settings,
+        )
+
+    @classmethod
+    def load(cls) -> Self:
+        return cls()

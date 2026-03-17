@@ -1,16 +1,17 @@
 from datetime import datetime, timedelta, timezone
-
 import jwt
-from decouple import config
+from adapters.config.settings import Config
+
+config = Config.load()
 
 
 class TokenProvider:
     def create_access_token(self, data: dict) -> str:
         to_encode = data.copy()
-        expire_minutes = config("IAM_ACCESS_TOKEN_EXPIRE_MINUTES", cast=int)
+        expire_minutes = config.jwt.expires_in
         time_delta = timedelta(minutes=expire_minutes)
-        secret_key = config("IAM_SECRET_KEY")
-        algorithm = config("IAM_ALGORITHM")
+        secret_key = config.jwt.secret_key.get_secret_value()
+        algorithm = config.jwt.algorithm.get_secret_value()
         if time_delta:
             expire = datetime.now(timezone.utc) + time_delta
         else:

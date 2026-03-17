@@ -1,13 +1,16 @@
 [dependency-groups]
 dev = [
     "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
     "bcrypt>=5.0.0",
     "fastapi[standard]>=0.133.1",
     "mypy>=1.19.1",
     "passlib[bcrypt]>=1.7.4",
     "pwdlib[argon2,bcrypt]>=0.3.0",
+    "pydantic-settings>=2.13.1",
     "pyjwt>=2.11.0",
     "python-decouple>=3.8",
+    "redis>=7.3.0",
     "ruff>=0.15.5",
     "uvicorn>=0.41.0",
 ]

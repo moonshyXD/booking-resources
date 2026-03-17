@@ -1,12 +1,35 @@
-
 html, body {
     margin: 0;
     padding: 0;
     height: 100%;
 }
-
 body {
-     background-image: url('/background.jpg');
-    background-size: cover;
-    background-position: center;
+    background-image: url('/background.jpg');
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: top center;
+
+    font-family: "Vollkorn", serif;
 }
+
+:root {
+    --gold: #E0C58F;
+    --dark-blue: #0D1847;
+    --light-blue: #3C507D;
+    --dark-beige: #D9CBC2;
+    --light-beige: #F5F0E9;
+    --dark-red: #8E0000;
+    --light-red: #FFD2D2;
+    --just-red: #FF0000;
+    --very-light-blue: #13007F;
+
+    --font-title: 40px;
+    --font-xl: 35px;
+    --font-l: 30px;
+    --font-m: 28px;
+    --font-s: 25px;
+    --font-xs: 20px;
+
+    --radius: 15px;
+}
+

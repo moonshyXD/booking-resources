@@ -41,7 +41,7 @@ class CompanyRepositoryPostgres:
         if company_db is None:
             return None
 
-        self.session.delete(company_db)
+        await self.session.delete(company_db)
         await self.session.flush()
         return self._to_entity(company_db)
 

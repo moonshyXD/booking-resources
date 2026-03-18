@@ -24,7 +24,7 @@ def get_company_service(session: Annotated[AsyncSession, Depends(get_db_session)
     return CompanyService(repository=CompanyRepositoryPostgres(session))
 
 
-@router.get(path="/", response_model=list[CompanyResponse], status_code=status.HTTP_200_OK)
+@router.get(path="/v1", response_model=list[CompanyResponse], status_code=status.HTTP_200_OK)
 async def get_companies(
     service: Annotated[CompanyService, Depends(get_company_service)],
     offset: int = Query(0, ge=0),
@@ -33,7 +33,7 @@ async def get_companies(
     return await service.get_companies(offset=offset, limit=limit)
 
 
-@router.post(path="/", response_model=CompanyResponse, status_code=status.HTTP_201_CREATED)
+@router.post(path="/v1", response_model=CompanyResponse, status_code=status.HTTP_201_CREATED)
 async def add_company(company: CompanyRequest,
                    service: Annotated[CompanyService, Depends(get_company_service)]
                    ) -> CompanyResponse:
@@ -51,7 +51,7 @@ async def add_company(company: CompanyRequest,
 
     return request
 
-@router.delete(path="/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(path="/v1/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_company(
         company_id: int,
         service: Annotated[CompanyService, Depends(get_company_service)]
@@ -63,7 +63,7 @@ async def delete_company(
             detail="Компания не найдена"
         )
 
-@router.put(path="/{company_id}", response_model=CompanyResponse, status_code=status.HTTP_200_OK)
+@router.put(path="/v1/{company_id}", response_model=CompanyResponse, status_code=status.HTTP_200_OK)
 async def update_company(
         company_id: int,
         new_company: CompanyRequest,

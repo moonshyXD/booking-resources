@@ -36,3 +36,25 @@ class TokenProvider:
         to_encode.update({"exp": expire, "type": "refresh"})
 
         return jwt.encode(to_encode, secret_key, algorithm=algorithm)
+
+    def decode_token(self, token: str) -> dict:
+        secret_key = config.jwt.secret_key.get_secret_value()
+        algorithm = config.jwt.algorithm.get_secret_value()
+
+        return jwt.decode(token, secret_key, algorithms=[algorithm])
+
+    def verify_access_token(self, token: str) -> dict:
+        payload = self.decode_token(token)
+
+        if payload.get("type") != "access":
+            raise jwt.InvalidTokenError("Ожидался access токен, но получен другой тип")
+
+        return payload
+
+    def verify_refresh_token(self, token: str) -> dict:
+        payload = self.decode_token(token)
+
+        if payload.get("type") != "refresh":
+            raise jwt.InvalidTokenError("Ожидался refresh токен, но получен другой тип")
+
+        return payload

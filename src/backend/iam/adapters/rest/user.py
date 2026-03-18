@@ -46,7 +46,7 @@ def get_hasher() -> PasswordHasher:
     return PasswordHasher()
 
 
-@router.get(path="/", response_model=list[UserResponse], status_code=status.HTTP_200_OK)
+@router.get(path="/v1", response_model=list[UserResponse], status_code=status.HTTP_200_OK)
 async def get_users(
     service: Annotated[UserService, Depends(get_user_service)],
     offset: int = Query(0, ge=0),
@@ -55,7 +55,7 @@ async def get_users(
     return await service.get_users(offset=offset, limit=limit)
 
 
-@router.post(path="/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(path="/v1", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def add_user(user: CreateUserRequest,
                    service: Annotated[UserService, Depends(get_user_service)],
                    hasher: Annotated[PasswordHasher, Depends(get_hasher)]
@@ -80,7 +80,7 @@ async def add_user(user: CreateUserRequest,
 
     return request
 
-@router.post(path="/admin", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(path="/v1/admin", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def add_admin(user: BaseUserRequest,
                    service: Annotated[UserService, Depends(get_user_service)],
                    hasher: Annotated[PasswordHasher, Depends(get_hasher)]
@@ -105,7 +105,7 @@ async def add_admin(user: BaseUserRequest,
 
     return request
 
-@router.post(path="/company_admin", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(path="/v1/company_admin", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def add_company_admin(user: CreateUserRequest,
                    service: Annotated[UserService, Depends(get_user_service)],
                    hasher: Annotated[PasswordHasher, Depends(get_hasher)]
@@ -130,7 +130,7 @@ async def add_company_admin(user: CreateUserRequest,
 
     return request
 
-@router.delete(path="/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(path="/v1/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
         user_id: int,
         service: Annotated[UserService, Depends(get_user_service)]
@@ -142,7 +142,7 @@ async def delete_user(
             detail="Пользователь не найден"
         )
 
-@router.put(path="/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
+@router.put(path="/v1/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def update_user(
         user_id: int,
         new_user: CreateUserRequest,

@@ -16,7 +16,7 @@ class UserDB(Base):
 
     id = Column(Integer, primary_key=True)
     company_id = Column(
-        Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False
+        Integer, nullable=False
     )
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)

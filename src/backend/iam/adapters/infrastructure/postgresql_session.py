@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 
-class DatabaseDependency:
+class PostgresDependency:
     def __init__(self, db_url: str) -> None:
         self._engine = create_async_engine(
             db_url,
@@ -25,6 +25,7 @@ class DatabaseDependency:
         async with self._session_factory() as session:
             try:
                 yield session
+                await session.commit()
             except Exception:
                 await session.rollback()
                 raise

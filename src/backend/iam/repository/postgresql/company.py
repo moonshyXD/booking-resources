@@ -1,8 +1,9 @@
 from dataclasses import asdict
 
 from domain.models.company import Company
-from ..models.company import CompanyDB
+from repository.models.company import CompanyDB
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, or_
 
 
 class CompanyRepositoryPostgres:
@@ -13,14 +14,26 @@ class CompanyRepositoryPostgres:
         company_db = await self.session.get(CompanyDB, company_id)
         if company_db is None:
             return None
-        return self._to_entity(company_db)
+        return self.to_entity(company_db)
 
-    async def add_company(self, company: Company) -> Company:
+    async def add_company(self, company: Company) -> Company | None:
         company_data = self._validate_company_data(company)
+        
+        query = select(CompanyDB).where(
+            or_(
+                CompanyDB.name == company.name,
+                CompanyDB.slug == company.slug
+            )
+        )
+        result = await self.session.execute(query)
+        existing_company = result.scalar_one_or_none()
+        if existing_company is not None:
+            return None
+            
         company_db = CompanyDB(**company_data)
         self.session.add(company_db)
         await self.session.flush()
-        return self._to_entity(company_db)
+        return self.to_entity(company_db)
 
     async def update_company_by_id(
             self, company_id: int, new_company: Company
@@ -29,12 +42,13 @@ class CompanyRepositoryPostgres:
         if company_db is None:
             return None
 
-        new_company_data = self._validate_company_data(new_company)
+        domain_company = CompanyRepositoryPostgres.to_entity(company_db)
+        new_company_data = self._validate_company_data(domain_company)
         for key, value in new_company_data.items():
             setattr(company_db, key, value)
 
         await self.session.flush()
-        return self._to_entity(company_db)
+        return self.to_entity(company_db)
 
     async def delete_company_by_id(self, company_id: int) -> Company | None:
         company_db = await self.session.get(CompanyDB, company_id)
@@ -43,7 +57,13 @@ class CompanyRepositoryPostgres:
 
         await self.session.delete(company_db)
         await self.session.flush()
-        return self._to_entity(company_db)
+        return self.to_entity(company_db)
+
+    async def get_companies(self, offset: int = 0, limit: int = 20) -> list[Company]:
+        stmt = select(CompanyDB).offset(offset).limit(limit)
+        result = await self.session.execute(stmt)
+        companies_db = result.scalars().all()
+        return [self.to_entity(company) for company in companies_db]
 
     @staticmethod
     def _validate_company_data(company: Company) -> dict:
@@ -53,7 +73,7 @@ class CompanyRepositoryPostgres:
         return data
 
     @staticmethod
-    def _to_entity(company_db_instance: CompanyDB) -> Company:
+    def to_entity(company_db_instance: CompanyDB) -> Company:
         return Company(
             id=company_db_instance.id,
             name=company_db_instance.name,

@@ -1,21 +1,38 @@
 from datetime import datetime, timedelta, timezone
 import jwt
+from pydantic import BaseModel
 from adapters.config.settings import Config
 
 config = Config.load()
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
 
 
 class TokenProvider:
     def create_access_token(self, data: dict) -> str:
         to_encode = data.copy()
         expire_minutes = config.jwt.expires_in
-        time_delta = timedelta(minutes=expire_minutes)
+        time_delta = timedelta(minutes=expire_minutes) if expire_minutes else timedelta(minutes=15)
+
         secret_key = config.jwt.secret_key.get_secret_value()
         algorithm = config.jwt.algorithm.get_secret_value()
-        if time_delta:
-            expire = datetime.now(timezone.utc) + time_delta
-        else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-        to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=algorithm)
-        return encoded_jwt
+
+        expire = datetime.now(timezone.utc) + time_delta
+        to_encode.update({"exp": expire, "type": "access"})
+
+        return jwt.encode(to_encode, secret_key, algorithm=algorithm)
+
+    def create_refresh_token(self, data: dict) -> str:
+        to_encode = data.copy()
+        time_delta = timedelta(days=30)
+
+        secret_key = config.jwt.secret_key.get_secret_value()
+        algorithm = config.jwt.algorithm.get_secret_value()
+
+        expire = datetime.now(timezone.utc) + time_delta
+        to_encode.update({"exp": expire, "type": "refresh"})
+
+        return jwt.encode(to_encode, secret_key, algorithm=algorithm)

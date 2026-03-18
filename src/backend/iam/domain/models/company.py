@@ -5,11 +5,12 @@ from typing import Protocol
 
 @dataclass
 class Company:
-    id: int
     name: str
     slug: str
-    is_active: bool
-    created_at: datetime
+    
+    id: int | None = None
+    is_active: bool = True
+    created_at: datetime | None = None
 
 
 class CompanyRepositoryI(Protocol):
@@ -17,3 +18,4 @@ class CompanyRepositoryI(Protocol):
     async def add_company(self, company: Company): ...
     async def delete_company_by_id(self, company_id: int): ...
     async def update_company_by_id(self, company_id: int, new_company: Company): ...
+    async def get_companies(self, offset: int = 0, limit: int = 20): ...

@@ -14,5 +14,4 @@ class PasswordHasher:
     def verify_password(
         self, plain_password: str, hashed_password: str
     ) -> bool:
-        print(self.password_hash.hash(plain_password))
         return self.password_hash.verify(plain_password, hashed_password)

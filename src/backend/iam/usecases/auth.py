@@ -11,7 +11,7 @@ class AuthService:
         self.token_provider = token_provider
         self.repository = repository
 
-    async def authenticate(self, email: str, password: str) -> str | None:
+    async def authenticate(self, email: str, password: str) -> dict | None:
         user_id = await self.repository.get_id_by_email(email)
         if user_id is None:
             return None
@@ -22,4 +22,13 @@ class AuthService:
         ):
             return None
 
-        return self.token_provider.create_access_token({"sub": email})
+        access_token = self.token_provider.create_access_token({"sub": email})
+        refresh_token = self.token_provider.create_refresh_token({"sub": email})
+        role = await self.repository.get_role_by_id(user_id)
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "role": role,
+            "token_type": "bearer"
+        }

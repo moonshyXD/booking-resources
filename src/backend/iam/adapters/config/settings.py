@@ -3,13 +3,12 @@ from typing import Self
 from pydantic import Field
 from pydantic_settings import BaseSettings, TomlConfigSettingsSource
 
-from adapters.config.env_config import DatabaseConfig, IamConfig, JWTConfig
+from adapters.config.env_config import DatabaseConfig, JWTConfig
 from adapters.config.toml_config import FastapiConfig, RedisConfig
 
 
 class Config(BaseSettings):
     db: DatabaseConfig = Field(default_factory=DatabaseConfig)
-    iam: IamConfig = Field(default_factory=IamConfig)
     jwt: JWTConfig = Field(default_factory=JWTConfig)
     redis: RedisConfig
     fastapi: FastapiConfig

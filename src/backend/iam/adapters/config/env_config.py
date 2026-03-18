@@ -12,10 +12,6 @@ class DatabaseConfig(ConfigBase):
     database: str
 
 
-class IamConfig(ConfigBase):
-    model_config = SettingsConfigDict(env_prefix="IAM_")
-
-
 class JWTConfig(ConfigBase):
     model_config = SettingsConfigDict(env_prefix="JWT_")
 

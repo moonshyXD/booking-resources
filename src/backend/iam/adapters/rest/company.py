@@ -3,16 +3,17 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from typing import Annotated
+from adapters.infrastructure.postgresql_session import PostgresDependency
 
-from adapters.rest.database import get_db_session
 from usecases.company import CompanyService
 from domain.models.company import Company
-from repository.postgresql.company import CompanyRepositoryPostgres
+from repository.orm.company import CompanyRepositoryPostgres
 
 from adapters.shared.role import RoleChecker
 
 require_admin = RoleChecker(["ADMIN"])
 
+db_obj = PostgresDependency()
 router = APIRouter(
     prefix="/companies",
     tags=["companies"],
@@ -29,7 +30,7 @@ class CompanyResponse(CompanyRequest):
     created_at: datetime
 
 
-def get_company_service(session: Annotated[AsyncSession, Depends(get_db_session)]) -> CompanyService:
+def get_company_service(session: Annotated[AsyncSession, Depends(db_obj.get_db_session)]) -> CompanyService:
     return CompanyService(repository=CompanyRepositoryPostgres(session))
 
 

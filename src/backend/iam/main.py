@@ -5,15 +5,12 @@ from sqlalchemy import select, text
 from adapters.rest.auth import router as auth_router
 from adapters.auth.hasher import PasswordHasher
 from adapters.infrastructure.postgresql_session import PostgresDependency
-from adapters.config.settings import Config
 from adapters.rest.company import router as company_router
 from adapters.rest.user import router as user_router
 
 from repository.models.user import UserDB
 
-config = Config.load()
-db_url = f"postgresql+asyncpg://{config.db.user.get_secret_value()}:{config.db.password.get_secret_value()}@{config.db.host}/{config.db.database}"
-db_dependency = PostgresDependency(db_url)
+db_dependency = PostgresDependency()
 
 
 @asynccontextmanager

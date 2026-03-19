@@ -6,12 +6,13 @@ from typing import Annotated
 from adapters.auth.hasher import PasswordHasher
 from adapters.auth.token import TokenProvider
 from usecases.auth import AuthService
-from repository.postgresql.user import UserRepositoryPostgres
+from repository.orm.user import UserRepositoryPostgres
 from adapters.config.settings import Config
-from adapters.rest.database import get_db_session
+from adapters.infrastructure.postgresql_session import PostgresDependency
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/auth", tags=["auth"])
 
+db_obj = PostgresDependency()
 
 class AuthUser(BaseModel):
     email: str
@@ -23,7 +24,7 @@ class LoginResponse(BaseModel):
     role: str
 
 
-def get_auth_service(session: Annotated[AsyncSession, Depends(get_db_session)]) -> AuthService:
+def get_auth_service(session: Annotated[AsyncSession, Depends(db_obj.get_db_session)]) -> AuthService:
     return AuthService(
         hasher=PasswordHasher(),
         token_provider=TokenProvider(),

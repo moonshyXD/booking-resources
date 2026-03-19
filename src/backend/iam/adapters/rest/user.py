@@ -4,10 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from typing import Annotated
 
-from adapters.rest.database import get_db_session
+from adapters.infrastructure.postgresql_session import PostgresDependency
+
 from usecases.user import UserService
 from domain.models.user import User
-from repository.postgresql.user import UserRepositoryPostgres
+from repository.orm.user import UserRepositoryPostgres
 from adapters.auth.hasher import PasswordHasher
 
 from adapters.shared.role import RoleChecker
@@ -17,6 +18,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 require_admin = RoleChecker(["ADMIN"])
 require_admin_or_company_admin = RoleChecker(["ADMIN", "COMPANY_ADMIN"])
 
+db_obj = PostgresDependency()
 
 class BaseUserRequest(BaseModel):
     email: str
@@ -49,7 +51,7 @@ class UserResponse(BaseModel):
     created_at: datetime
 
 
-def get_user_service(session: Annotated[AsyncSession, Depends(get_db_session)]) -> UserService:
+def get_user_service(session: Annotated[AsyncSession, Depends(db_obj.get_db_session)]) -> UserService:
     return UserService(repository=UserRepositoryPostgres(session))
 
 

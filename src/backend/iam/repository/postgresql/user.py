@@ -51,13 +51,22 @@ class UserRepositoryPostgres:
         if user_db is None:
             return None
 
-        domain_user = UserRepositoryPostgres.to_entity(user_db)
-        new_user_data = self._validate_user_data(domain_user)
+        new_user_data = self._validate_user_data(new_user)
 
         for key, value in new_user_data.items():
             setattr(user_db, key, value)
 
         await self.session.flush()
+
+        return self.to_entity(user_db)
+
+    async def get_user_by_email(self, email: str) -> User | None:
+        stmt = select(UserDB).where(UserDB.email == email)
+        result = await self.session.execute(stmt)
+        user_db = result.scalar_one_or_none()
+
+        if user_db is None:
+            return None
 
         return self.to_entity(user_db)
 

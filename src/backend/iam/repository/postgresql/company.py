@@ -42,8 +42,8 @@ class CompanyRepositoryPostgres:
         if company_db is None:
             return None
 
-        domain_company = CompanyRepositoryPostgres.to_entity(company_db)
-        new_company_data = self._validate_company_data(domain_company)
+        new_company_data = self._validate_company_data(new_company)
+
         for key, value in new_company_data.items():
             setattr(company_db, key, value)
 

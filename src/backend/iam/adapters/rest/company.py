@@ -2,13 +2,22 @@ from fastapi import APIRouter, status, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
-from adapters.rest.database import get_db_session
 from typing import Annotated
+
+from adapters.rest.database import get_db_session
 from usecases.company import CompanyService
 from domain.models.company import Company
 from repository.postgresql.company import CompanyRepositoryPostgres
 
-router = APIRouter(prefix="/companies", tags=["companies"])
+from adapters.shared.role import RoleChecker
+
+require_admin = RoleChecker(["ADMIN"])
+
+router = APIRouter(
+    prefix="/companies",
+    tags=["companies"],
+    dependencies=[Depends(require_admin)]
+)
 
 class CompanyRequest(BaseModel):
     name: str
@@ -34,9 +43,10 @@ async def get_companies(
 
 
 @router.post(path="/v1", response_model=CompanyResponse, status_code=status.HTTP_201_CREATED)
-async def add_company(company: CompanyRequest,
-                   service: Annotated[CompanyService, Depends(get_company_service)]
-                   ) -> CompanyResponse:
+async def add_company(
+        company: CompanyRequest,
+        service: Annotated[CompanyService, Depends(get_company_service)]
+) -> CompanyResponse:
     domain_company = Company(
         name=company.name,
         slug=company.slug,
@@ -48,14 +58,14 @@ async def add_company(company: CompanyRequest,
             status_code=status.HTTP_409_CONFLICT,
             detail="Компания уже есть в базе"
         )
-
     return request
+
 
 @router.delete(path="/v1/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_company(
         company_id: int,
         service: Annotated[CompanyService, Depends(get_company_service)]
-    ):
+):
     request = await service.delete_company(company_id)
     if request is None:
         raise HTTPException(
@@ -63,12 +73,13 @@ async def delete_company(
             detail="Компания не найдена"
         )
 
+
 @router.put(path="/v1/{company_id}", response_model=CompanyResponse, status_code=status.HTTP_200_OK)
 async def update_company(
         company_id: int,
         new_company: CompanyRequest,
         service: Annotated[CompanyService, Depends(get_company_service)]
-    ) -> CompanyResponse:
+) -> CompanyResponse:
     domain_company = Company(
         name=new_company.name,
         slug=new_company.slug,
@@ -80,5 +91,4 @@ async def update_company(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Компания не найдена"
         )
-
     return request

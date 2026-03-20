@@ -33,7 +33,6 @@ class UserRepositoryPostgres:
         query = select(UserDB).where(UserDB.email == user.email)
         result = await self.session.execute(query)
         existing_user = result.scalar_one_or_none()
-
         if existing_user is not None:
             return None
 

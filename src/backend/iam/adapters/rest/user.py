@@ -10,7 +10,7 @@ from usecases.user import UserService
 from domain.models.user import User
 from repository.orm.user import UserRepositoryPostgres
 from adapters.auth.hasher import PasswordHasher
-
+from adapters.infrastructure.logger import logging
 from adapters.shared.role import RoleChecker
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -22,8 +22,6 @@ db_obj = PostgresDependency()
 
 class BaseUserRequest(BaseModel):
     email: str
-    password: str
-
     first_name: str | None = None
     last_name: str | None = None
     telegram_username: str | None = None
@@ -81,11 +79,11 @@ async def add_user(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Вы можете добавлять пользователей только в свою компанию"
             )
-
+    password = hasher.get_password()
     domain_user = User(
         company_id=user.company_id,
         email=user.email,
-        password_hash=hasher.get_password_hash(user.password),
+        password_hash=hasher.get_password_hash(password),
         first_name=user.first_name,
         last_name=user.last_name,
         telegram_username=user.telegram_username,
@@ -100,6 +98,7 @@ async def add_user(
             detail="Пользователь уже есть в базе или указана несуществующая компания"
         )
 
+    logging.info(f"Сгенерированный пароль пользователя: {password}")
     return request
 
 
@@ -109,10 +108,11 @@ async def add_company_admin(
         service: Annotated[UserService, Depends(get_user_service)],
         hasher: Annotated[PasswordHasher, Depends(get_hasher)],
 ) -> UserResponse:
+    password = hasher.get_password()
     domain_user = User(
         company_id=user.company_id,
         email=user.email,
-        password_hash=hasher.get_password_hash(user.password),
+        password_hash=hasher.get_password_hash(password),
         first_name=user.first_name,
         last_name=user.last_name,
         telegram_username=user.telegram_username,
@@ -127,6 +127,7 @@ async def add_company_admin(
             detail="Пользователь уже есть в базе или указана несуществующая компания"
         )
 
+    logging.info(f"Сгенерированный пароль пользователя: {password}")
     return request
 
 
@@ -135,10 +136,6 @@ async def delete_user(
         user_id: int,
         service: Annotated[UserService, Depends(get_user_service)],
 ):
-    # Примечание: В идеале, внутри service.delete_user тоже нужно
-    # проверять, не пытается ли COMPANY_ADMIN удалить юзера из чужой компании.
-    # Для этого в сервис нужно будет передавать current_user.get("company_id").
-
     request = await service.delete_user(user_id)
     if request is None:
         raise HTTPException(
@@ -161,11 +158,11 @@ async def update_user(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Вы можете взаимодействовать только со своей компанией"
             )
-
+    password = hasher.get_password()
     domain_user = User(
         company_id=new_user.company_id,
         email=new_user.email,
-        password_hash=hasher.get_password_hash(new_user.password),
+        password_hash=hasher.get_password_hash(password),
         first_name=new_user.first_name,
         last_name=new_user.last_name,
         telegram_username=new_user.telegram_username,
@@ -180,4 +177,5 @@ async def update_user(
             detail="Пользователь не найден"
         )
 
+    logging.info(f"Сгенерированный пароль пользователя: {password}")
     return request

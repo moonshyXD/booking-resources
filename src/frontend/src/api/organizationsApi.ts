@@ -11,10 +11,8 @@ const MOCK_ORGANIZATIONS: Organization[] = [
 ]
 
 export const fetchOrganizations = async (): Promise<Organization[]> => {
-    // Имитация задержки сети (чтобы увидеть loading)
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    // Возвращаем мок-данные
     return MOCK_ORGANIZATIONS
 
     // const response = await fetch('/api/organizations')

@@ -44,8 +44,6 @@ async def lifespan(app: FastAPI):
 
             session.add(new_user)
             await session.commit()
-        else:
-            print(f"⚡ Юзер {test_email} уже существует, создание пропускаем.")
 
     yield
 

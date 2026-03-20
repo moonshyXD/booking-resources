@@ -14,6 +14,16 @@ class CompanyRepositoryPostgres:
         company_db = await self.session.get(CompanyDB, company_id)
         if company_db is None:
             return None
+
+        return self.to_entity(company_db)
+
+    async def get_company_by_slug(self, slug: str) -> Company | None:
+        stmt = select(CompanyDB).where(CompanyDB.slug == slug)
+        result = await self.session.execute(stmt)
+        company_db = result.scalar_one_or_none()
+        if company_db is None:
+            return None
+
         return self.to_entity(company_db)
 
     async def add_company(self, company: Company) -> Company | None:

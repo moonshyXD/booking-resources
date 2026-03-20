@@ -122,3 +122,9 @@
     font-size: var(--font-s) !important;
     text-align: center !important;
 }
+
+.no-org{
+    textAlign: 'center' !important;
+    color: var(--very-light-blue) !important;
+    opacity: 30% !important;
+}

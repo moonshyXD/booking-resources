@@ -59,6 +59,16 @@ class UserRepositoryPostgres:
 
         return self.to_entity(user_db)
 
+    async def update_password(self, user_id: int, password_hash: str) -> User | None:
+        user_db = await self.session.get(UserDB, user_id)
+        if user_db is None:
+            return None
+
+        user_db.password_hash = password_hash
+        await self.session.flush()
+
+        return self.to_entity(user_db)
+
     async def get_user_by_email(self, email: str) -> User | None:
         stmt = select(UserDB).where(UserDB.email == email)
         result = await self.session.execute(stmt)
@@ -112,8 +122,7 @@ class UserRepositoryPostgres:
         new_user_data = asdict(user)
         new_user_data.pop("id", None)
         new_user_data.pop("created_at", None)
-
-        return new_user_data
+        return {k: v for k, v in new_user_data.items() if v is not None}
 
     @staticmethod
     def to_entity(user_db_instance: UserDB) -> User:

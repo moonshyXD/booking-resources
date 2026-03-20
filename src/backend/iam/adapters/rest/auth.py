@@ -7,7 +7,7 @@ from adapters.auth.hasher import PasswordHasher
 from adapters.auth.token import TokenProvider
 from usecases.auth import AuthService
 from repository.orm.user import UserRepositoryPostgres
-from adapters.config.settings import Config
+from repository.orm.company import CompanyRepositoryPostgres
 from adapters.infrastructure.postgresql_session import PostgresDependency
 
 from adapters.shared.token import get_current_user_payload
@@ -21,6 +21,7 @@ db_obj = PostgresDependency()
 class AuthUser(BaseModel):
     email: str
     password: str
+    company_slug: str | None = None
 
 
 class LoginResponse(BaseModel):
@@ -32,7 +33,8 @@ def get_auth_service(session: Annotated[AsyncSession, Depends(db_obj.get_db_sess
     return AuthService(
         hasher=PasswordHasher(),
         token_provider=TokenProvider(),
-        repository=UserRepositoryPostgres(session)
+        repository=UserRepositoryPostgres(session),
+        company_repository=CompanyRepositoryPostgres(session)
     )
 
 
@@ -42,12 +44,12 @@ async def login(
         service: Annotated[AuthService, Depends(get_auth_service)],
         response: Response
 ) -> LoginResponse:
-    tokens = await service.authenticate(email=user.email, password=user.password)
+    tokens = await service.authenticate(email=user.email, password=user.password, company_slug=user.company_slug)
 
     if not tokens:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неверный email или пароль"
+            detail="Неверный email, пароль или организация"
         )
 
     response.set_cookie(

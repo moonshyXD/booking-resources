@@ -1,0 +1,130 @@
+.choose-organization {
+    position: relative;
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.content-box{
+    width: 1131px;
+    padding: 30px 90px;
+    min-height: 600px;
+    background-color: var(--dark-blue);
+    border: 2px solid var(--gold);
+    border-radius: var(--radius) ;
+    text-align: center;
+    margin-top: 120px;
+}
+
+.main-text{
+    color: var(--gold);
+    font-size: var(--font-title);
+    margin-top: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.dropdown-label {
+    margin-top: 90px;
+    display: block;
+    font-size: var(--font-s);
+    margin-left: -620px;
+    color: var(--light-beige);
+    margin-bottom: 8px;
+}
+
+.btn{
+    text-align: center;
+}
+
+/* Кнопка */
+.btn-secondary {
+    background-color: var(--light-beige) !important;
+    border: 2px solid var(--gold) !important;
+    padding: 12px 20px !important;
+    border-radius: var(--radius) !important;
+    width: 952px;
+    height: 76px;
+}
+
+.label-secondary{
+    white-space: nowrap;
+    color: var(--light-blue) !important;
+    font-size: var(--font-s) !important;
+    margin-right: 900px !important;
+}
+
+.selected-label{
+    color: var(--very-light-blue) !important;
+    opacity: 30% !important;
+}
+
+/* Меню */
+.dropdown-menu {
+    justify-content: center;
+    background-color: var(--light-beige) !important;
+    border: 2px solid var(--gold) !important;
+    border-radius: var(--radius) !important;
+    padding: 10px !important;
+    width: 100% !important;
+    max-height: 210px !important;        /* максимальная высота (подбери под свой дизайн) */
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--dark-beige) var(--light-beige) !important;
+}
+
+/* Пункты меню */
+.dropdown-item {
+    text-align: center !important;
+    color: var(--light-blue) !important;
+    font-size: var(--font-xs) !important;
+    border-radius: 8px !important;
+}
+
+/* Пункт при наведении */
+.dropdown-item:hover {
+    text-align: center;
+    background-color: var(--dark-beige) !important;
+    color: var(--light-blue) !important;
+    font-size: var(--font-xs) !important;
+}
+
+.dropdown-toggle::after {
+    display: none !important;
+}
+
+.icons{
+    position: absolute !important;
+    color: var(--light-blue) !important;
+    font-size: var(--font-l) !important;
+    margin-left: 420px !important;
+    margin-top: 20px !important;
+    z-index: 1000 !important;
+}
+
+.button-to-entrance{
+    background-color: var(--gold) !important;
+    border: 2px solid var(--light-beige) !important;
+    color: var(--dark-blue) !important;
+    margin-top: 100px;
+    width: 380px !important;
+    height: 95px !important;
+    font-size: var(--font-l) !important;
+    font-weight: bold !important;
+    border-radius: var(--radius) !important;
+}
+
+.default-text{
+    margin-top: 360px !important;
+    color: var(--light-blue) !important;
+    font-size: var(--font-s) !important;
+    text-align: center !important;
+}
+
+.no-org{
+    textAlign: 'center' !important;
+    color: var(--very-light-blue) !important;
+    opacity: 30% !important;
+}

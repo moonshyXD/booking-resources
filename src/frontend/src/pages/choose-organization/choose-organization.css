@@ -1,36 +1,16 @@
-.choose-organization {
-    position: relative;
-    display: flex;
-    min-height: 100vh;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-}
-
-.content-box{
-    width: 1131px;
-    padding: 30px 90px;
-    min-height: 600px;
-    background-color: var(--dark-blue);
-    border: 2px solid var(--gold);
-    border-radius: var(--radius) ;
-    text-align: center;
-    margin-top: 120px;
-}
-
 .main-text{
     color: var(--gold);
     font-size: var(--font-title);
-    margin-top: 20px;
+    margin-top: 60px;
     font-weight: bold;
     text-align: center;
 }
 
 .dropdown-label {
-    margin-top: 90px;
+    margin-top: 40px;
     display: block;
     font-size: var(--font-s);
-    margin-left: -620px;
+    margin-left: -320px;
     color: var(--light-beige);
     margin-bottom: 8px;
 }
@@ -39,14 +19,13 @@
     text-align: center;
 }
 
-/* Кнопка */
 .btn-secondary {
     background-color: var(--light-beige) !important;
     border: 2px solid var(--gold) !important;
     padding: 12px 20px !important;
     border-radius: var(--radius) !important;
-    width: 952px;
-    height: 76px;
+    width: 652px;
+    height: 66px;
 }
 
 .label-secondary{
@@ -69,7 +48,7 @@
     border-radius: var(--radius) !important;
     padding: 10px !important;
     width: 100% !important;
-    max-height: 210px !important;        /* максимальная высота (подбери под свой дизайн) */
+    max-height: 130px !important;        /* максимальная высота (подбери под свой дизайн) */
     overflow-y: auto !important;
     scrollbar-width: thin !important;
     scrollbar-color: var(--dark-beige) var(--light-beige) !important;
@@ -99,8 +78,8 @@
     position: absolute !important;
     color: var(--light-blue) !important;
     font-size: var(--font-l) !important;
-    margin-left: 420px !important;
-    margin-top: 20px !important;
+    margin-left: 280px !important;
+    margin-top: 15px !important;
     z-index: 1000 !important;
 }
 
@@ -109,8 +88,8 @@
     border: 2px solid var(--light-beige) !important;
     color: var(--dark-blue) !important;
     margin-top: 100px;
-    width: 380px !important;
-    height: 95px !important;
+    width: 300px !important;
+    height: 75px !important;
     font-size: var(--font-l) !important;
     font-weight: bold !important;
     border-radius: var(--radius) !important;

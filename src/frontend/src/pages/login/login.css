@@ -1,0 +1,107 @@
+.main-text{
+    color: var(--gold);
+    font-size: var(--font-title);
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.login-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 752px;
+    max-width: 100%;
+    margin: 30px auto 0;
+    text-align: left;
+}
+
+
+.login-field .login-label {
+    margin: 0 0 8px 0;
+    display: block;
+    width: 100%;
+    text-align: left;
+}
+
+.form-control{
+    background-color: var(--light-beige) !important;
+    border: 2px solid var(--gold) !important;
+    padding: 12px 20px !important;
+    border-radius: var(--radius) !important;
+    width: 552px!important;
+    height: 66px!important;
+}
+
+.login-field .form-control {
+    margin-top: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 10px 20px 16px 20px !important;
+    line-height: 1.25;
+    color: var(--light-blue) !important;
+    font-size: var(--font-xs);
+    font-family: inherit;
+    caret-color: var(--gold);
+}
+
+.login-field .form-control::placeholder {
+    color: var(--very-light-blue);
+    opacity: 0.3;
+    font-size: var(--font-xs);
+}
+
+.login-field .form-control::-webkit-input-placeholder {
+    color: var(--very-light-blue);
+    opacity: 0.3;
+    font-size: var(--font-xs);
+}
+
+.login-field .form-control::-moz-placeholder {
+    color: var(--very-light-blue);
+    opacity: 0.3;
+    font-size: var(--font-xs);
+}
+
+.form-label{
+    color: var(--light-beige) !important;
+    font-size: var(--font-s);
+    margin-top: 70px !important;
+
+}
+
+.login-field .form-label {
+    margin-top: 0 !important;
+}
+
+
+.button-to-entrance{
+    background-color: var(--gold) !important;
+    border: 2px solid var(--light-beige) !important;
+    color: var(--dark-blue) !important;
+    margin-top: 50px;
+    width: 300px !important;
+    height: 75px !important;
+    font-size: var(--font-l) !important;
+    font-weight: bold !important;
+    border-radius: var(--radius) !important;
+}
+
+.icons{
+    margin-top: 60px !important;
+    margin-left: 700px !important;
+}
+
+
+.forgot-pass{
+    color: var(--dark-beige) !important;
+    font-size: var(--font-xs);
+    text-align: right !important;
+    margin-top: 5px !important;
+    text-decoration: none;
+    cursor: pointer;
+}
+.forgot-pass:hover {
+    color: var(--gold);
+    text-decoration: underline;
+}

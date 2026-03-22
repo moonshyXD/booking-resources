@@ -1,9 +1,11 @@
 import './choose-organization.css'
 import { useQuery } from '@tanstack/react-query'
-import { fetchOrganizations, selectOrganization } from '../../api/organizationsApi'
+import { fetchOrganizations, /*selectOrganization*/} from '../../api/organizationsApi'
 import type { Organization } from '../../types/organization'
-import {useEffect, useState} from "react";
+import { useEffect, useState, type KeyboardEvent, type MouseEvent } from "react";
 import {useNavigate} from "react-router-dom";
+import ContentBox from '../../components/СontentBox/contentBox'
+import Wrapper from '../../components/Wrapper/wrapper'
 
 const ChooseOrganization = () => {
     const {data: organizations, isLoading, error} = useQuery({
@@ -29,7 +31,7 @@ const ChooseOrganization = () => {
         setSearchQuery('')
 
         try{
-            await selectOrganization(selectedOrg.id)
+           // await selectOrganization(selectedOrg.id)
             navigate('/login')
         } catch(error){
             console.error('Ошибка: ', error)
@@ -44,7 +46,7 @@ const ChooseOrganization = () => {
 
     useEffect(() => {
         if (!isOpen) {
-            setSearchQuery('')   // если список закрыт — сбрасываем поиск
+            setSearchQuery('')
         }
     }, [isOpen])
 
@@ -52,9 +54,10 @@ const ChooseOrganization = () => {
     if (error) return <div className="default-text"> Ошибка загрузки</div>
 
     return(
-        <div className="choose-organization"
-             tabIndex={0}
-             onKeyDown={(e) => {
+        <Wrapper>
+            <div
+                tabIndex={0}
+                onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
                  const key = e.key
                  if (key.length === 1 && !e.ctrlKey && !e.altKey) {
                      setSearchQuery(prev => prev + key)
@@ -63,17 +66,18 @@ const ChooseOrganization = () => {
                  } else if (key === 'Escape') {
                      setSearchQuery('')
                  }
-             }}>
-            <div className="content-box">
+             }}
+            >
+            <ContentBox>
                 <h1 className="main-text"> ПЛАТФОРМА <br/> БРОНИРОВАНИЯ РЕСУРСОВ </h1>
 
                 <label className="dropdown-label">
                     ВЫБЕРИТЕ ОРГАНИЗАЦИЮ
                 </label>
 
-                {selectedOrg && selectedOrg.name.length > 0 ? <i className="bi bi-x-lg icons" onClick={(e) => {
-                    e.preventDefault();      // отменяет действие по умолчанию
-                    e.stopPropagation();     // останавливает всплытие
+                {selectedOrg && selectedOrg.name.length > 0 ? <i className="bi bi-x-lg icons" onClick={(e: MouseEvent<HTMLElement>) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     setSelectedOrg(null);
                 }} style={{ cursor: 'pointer', marginLeft: 'auto' }}></i> : <i className="bi bi-chevron-down icons"></i>}
 
@@ -107,9 +111,10 @@ const ChooseOrganization = () => {
                         )}
                     </ul>
                 </div>
-                <button type="button" className="btn button-to-entrance" disabled={!selectedOrg} onClick={handleLogin}> {isSaving ? 'Отправка...' : 'ВОЙТИ'}</button>
+                <button type="button" className="btn button-to-entrance" disabled={!selectedOrg} onClick={handleLogin} > {isSaving ? 'Отправка...' : 'ВОЙТИ'}</button>
+            </ContentBox>
             </div>
-        </div>
+        </Wrapper>
 
     )
 }

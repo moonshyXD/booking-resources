@@ -133,7 +133,6 @@ class UserRepositoryPostgres:
             password_hash=user_db_instance.password_hash,
             first_name=user_db_instance.first_name,
             last_name=user_db_instance.last_name,
-            telegram_username=user_db_instance.telegram_username,
             avatar_url=user_db_instance.avatar_url,
             role=user_db_instance.role,
             is_active=user_db_instance.is_active,

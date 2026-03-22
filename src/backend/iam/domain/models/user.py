@@ -1,22 +1,22 @@
 from __future__ import annotations
 
+from uuid import UUID
 from dataclasses import dataclass
 from datetime import datetime
+from domain.models.user_role import UserRole
 from typing import Protocol
-
 
 @dataclass
 class User:
-    company_id: int | None
+    company_id: UUID | None
     email: str
     password_hash: str
 
-    id: int | None = None
+    id: UUID | None = None
     first_name: str | None = None
     last_name: str | None = None
-    telegram_username: str | None = None
     avatar_url: str | None = None
-    role: str = "USER"
+    role: str = UserRole.USER
     is_active: bool = True
     created_at: datetime | None = None
 

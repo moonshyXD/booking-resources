@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, status, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,8 +11,9 @@ from domain.models.company import Company
 from repository.orm.company import CompanyRepositoryPostgres
 
 from adapters.shared.role import RoleChecker
+from domain.models.user_role import UserRole
 
-require_admin = RoleChecker(["ADMIN"])
+require_admin = RoleChecker([UserRole.ADMIN])
 
 db_obj = PostgresDependency()
 router = APIRouter(
@@ -26,7 +28,7 @@ class CompanyRequest(BaseModel):
     is_active: bool = True
 
 class CompanyResponse(CompanyRequest):
-    id: int
+    id: uuid.UUID
     created_at: datetime
 
 
@@ -64,7 +66,7 @@ async def add_company(
 
 @router.delete(path="/v1/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_company(
-        company_id: int,
+        company_id: uuid.UUID,
         service: Annotated[CompanyService, Depends(get_company_service)]
 ):
     request = await service.delete_company(company_id)
@@ -77,7 +79,7 @@ async def delete_company(
 
 @router.put(path="/v1/{company_id}", response_model=CompanyResponse, status_code=status.HTTP_200_OK)
 async def update_company(
-        company_id: int,
+        company_id: uuid.UUID,
         new_company: CompanyRequest,
         service: Annotated[CompanyService, Depends(get_company_service)]
 ) -> CompanyResponse:

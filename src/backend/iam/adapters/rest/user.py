@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, status, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,11 +13,12 @@ from repository.orm.user import UserRepositoryPostgres
 from adapters.auth.hasher import PasswordHasher
 from adapters.infrastructure.logger import logging
 from adapters.shared.role import RoleChecker
+from domain.models.user_role import UserRole
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-require_admin = RoleChecker(["ADMIN"])
-require_admin_or_company_admin = RoleChecker(["ADMIN", "COMPANY_ADMIN"])
+require_admin = RoleChecker([UserRole.ADMIN])
+require_admin_or_company_admin = RoleChecker([UserRole.ADMIN, UserRole.COMPANY_ADMIN])
 
 db_obj = PostgresDependency()
 
@@ -25,28 +27,27 @@ class BaseUserRequest(BaseModel):
     email: str
     first_name: str | None = None
     last_name: str | None = None
-    telegram_username: str | None = None
     avatar_url: str | None = None
 
 
 class CreateUserRequest(BaseUserRequest):
-    company_id: int
+    company_id: uuid.UUID
 
 
 class UpdateUserRequest(CreateUserRequest):
     role: str
+
 
 class UpdatePasswordRequest(BaseModel):
     email: str
 
 
 class UserResponse(BaseModel):
-    id: int
-    company_id: int | None
+    id: uuid.UUID
+    company_id: uuid.UUID | None
     email: str
     first_name: str | None = None
     last_name: str | None = None
-    telegram_username: str | None = None
     avatar_url: str | None = None
     role: str
     is_active: bool
@@ -61,14 +62,14 @@ def get_hasher() -> PasswordHasher:
     return PasswordHasher()
 
 
-def map_to_domain_user(request_data: BaseUserRequest, password_hash: str, role: str, company_id: int | None = None) -> User:
+def map_to_domain_user(request_data: BaseUserRequest, password_hash: str, role: str,
+                       company_id: uuid.UUID | None = None) -> User:
     return User(
         company_id=company_id,
         email=request_data.email,
         password_hash=password_hash,
         first_name=request_data.first_name,
         last_name=request_data.last_name,
-        telegram_username=request_data.telegram_username,
         avatar_url=request_data.avatar_url,
         role=role,
         is_active=True
@@ -92,21 +93,21 @@ async def add_user(
         hasher: Annotated[PasswordHasher, Depends(get_hasher)],
         current_user: dict = Depends(require_admin_or_company_admin)
 ) -> UserResponse:
-    if current_user.get("role") == "COMPANY_ADMIN":
-        if user.company_id != current_user.get("company_id"):
+    if current_user.get("role") == UserRole.COMPANY_ADMIN:
+        if str(user.company_id) != str(current_user.get("company_id")):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Вы можете добавлять пользователей только в свою компанию"
             )
-            
+
     password = hasher.get_password()
     domain_user = map_to_domain_user(
-        request_data=user, 
-        password_hash=hasher.get_password_hash(password), 
-        role="USER", 
+        request_data=user,
+        password_hash=hasher.get_password_hash(password),
+        role="USER",
         company_id=user.company_id
     )
-    
+
     request = await service.add_user(domain_user)
     if request is None:
         raise HTTPException(
@@ -127,12 +128,12 @@ async def add_admin(
 ) -> UserResponse:
     password = hasher.get_password()
     domain_user = map_to_domain_user(
-        request_data=user, 
-        password_hash=hasher.get_password_hash(password), 
-        role="ADMIN", 
+        request_data=user,
+        password_hash=hasher.get_password_hash(password),
+        role=UserRole.ADMIN,
         company_id=None
     )
-    
+
     request = await service.add_user(domain_user)
     if request is None:
         raise HTTPException(
@@ -153,12 +154,12 @@ async def add_company_admin(
 ) -> UserResponse:
     password = hasher.get_password()
     domain_user = map_to_domain_user(
-        request_data=user, 
-        password_hash=hasher.get_password_hash(password), 
-        role="COMPANY_ADMIN", 
+        request_data=user,
+        password_hash=hasher.get_password_hash(password),
+        role=UserRole.COMPANY_ADMIN,
         company_id=user.company_id
     )
-    
+
     request = await service.add_user(domain_user)
     if request is None:
         raise HTTPException(
@@ -173,7 +174,7 @@ async def add_company_admin(
 @router.delete(path="/v1/{user_id}", status_code=status.HTTP_204_NO_CONTENT,
                dependencies=[Depends(require_admin_or_company_admin)])
 async def delete_user(
-        user_id: int,
+        user_id: uuid.UUID,
         service: Annotated[UserService, Depends(get_user_service)],
 ):
     request = await service.delete_user(user_id)
@@ -186,32 +187,32 @@ async def delete_user(
 
 @router.put(path="/v1/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def update_user(
-        user_id: int,
+        user_id: uuid.UUID,
         new_user: UpdateUserRequest,
         service: Annotated[UserService, Depends(get_user_service)],
         current_user: dict = Depends(require_admin_or_company_admin)
 ) -> UserResponse:
-    if current_user.get("role") == "COMPANY_ADMIN":
-        if new_user.company_id != current_user.get("company_id"):
+    if current_user.get("role") == UserRole.COMPANY_ADMIN:
+        if str(new_user.company_id) != str(current_user.get("company_id")):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Вы можете взаимодействовать только со своей компанией"
             )
-            
+
     existing_password_hash = await service.repository.get_password_by_id(user_id)
     if existing_password_hash is None:
-         raise HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Пользователь не найден"
         )
-    
+
     domain_user = map_to_domain_user(
-        request_data=new_user, 
-        password_hash=existing_password_hash, 
-        role=new_user.role, 
+        request_data=new_user,
+        password_hash=existing_password_hash,
+        role=new_user.role,
         company_id=new_user.company_id
     )
-    
+
     request = await service.update_user(user_id, domain_user)
     if request is None:
         raise HTTPException(
@@ -237,13 +238,13 @@ async def update_password(
 
     password = hasher.get_password()
     password_hash = hasher.get_password_hash(password)
-    
+
     updated_user = await service.update_password(user_id, password_hash)
     if updated_user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Пользователь не найден"
         )
-        
+
     logging.info(f"Сгенерированный новый пароль пользователя ID={user_id}: {password}")
     return updated_user

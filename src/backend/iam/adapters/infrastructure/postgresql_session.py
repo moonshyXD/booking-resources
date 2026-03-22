@@ -24,7 +24,7 @@ class PostgresDependency:
             expire_on_commit=False,
         )
 
-    async def get_db_session(self):
+    async def get_db_session(self) -> AsyncGenerator[AsyncSession, None]:
         async with self.get_session() as session:
             yield session
 

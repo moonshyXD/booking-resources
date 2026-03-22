@@ -8,6 +8,7 @@ config = Config.load()
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
+    uuid: str
     token_type: str = "bearer"
 
 

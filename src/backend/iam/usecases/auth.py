@@ -35,13 +35,17 @@ class AuthService:
 
         token_payload = {
             "sub": user.email,
-            "role": user.role,
-            "company_id": user.company_id
+            "id": str(user.id),
+            "company_id": str(user.company_id),
+            "role": user.role
         }
 
         access_token = self.token_provider.create_access_token(token_payload)
 
-        refresh_token = self.token_provider.create_refresh_token({"sub": user.email})
+        refresh_token = self.token_provider.create_refresh_token({
+            "sub": user.email,
+            "id": str(user.id)
+        })
 
         return {
             "access_token": access_token,

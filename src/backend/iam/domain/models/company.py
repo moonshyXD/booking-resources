@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
+from uuid import UUID
 
 
 @dataclass
@@ -8,7 +9,7 @@ class Company:
     name: str
     slug: str
     
-    id: int | None = None
+    id: UUID | None = None
     is_active: bool = True
     created_at: datetime | None = None
 

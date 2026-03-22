@@ -1,3 +1,4 @@
+import uuid
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from sqlalchemy import select, text
@@ -24,16 +25,26 @@ async def lifespan(app: FastAPI):
         existing_user = result.scalar_one_or_none()
 
         if not existing_user:
-            await session.execute(text("""
-                                       INSERT INTO companies (id, name, slug, is_active)
-                                       VALUES (1, 'Test Company', 'test-company', true) ON CONFLICT (id) DO NOTHING;
-                                       """))
+            company_query = await session.execute(
+                text("SELECT id FROM companies WHERE name = 'Test Company'")
+            )
+            company_id = company_query.scalar_one_or_none()
+
+            if not company_id:
+                company_id = uuid.uuid4()
+                await session.execute(
+                    text("""
+                        INSERT INTO companies (id, name, slug, is_active)
+                        VALUES (:id, 'Test Company', 'test-company', true)
+                    """),
+                    {"id": company_id}
+                )
 
             hasher = PasswordHasher()
             hashed_password = hasher.get_password_hash(test_password)
 
             new_user = UserDB(
-                company_id=1,
+                company_id=company_id,
                 email=test_email,
                 password_hash=hashed_password,
                 first_name="Admin",

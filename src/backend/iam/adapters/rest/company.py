@@ -1,40 +1,17 @@
 import uuid
-from fastapi import APIRouter, status, Depends, HTTPException, Query
-from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
 from typing import Annotated
-from adapters.infrastructure.postgresql_session import PostgresDependency
+from fastapi import APIRouter, status, Depends, HTTPException, Query
 
-from usecases.company import CompanyService
-from domain.models.company import Company
-from repository.orm.company import CompanyRepositoryPostgres
+from iam.adapters.schemas.company import CompanyRequest, CompanyResponse
+from iam.adapters.dependencies.company import get_company_service
+from iam.adapters.dependencies.auth import require_admin
+from iam.usecases.company import CompanyService
+from iam.domain.models.company import Company
 
-from adapters.shared.role import RoleChecker
-from domain.models.user_role import UserRole
-
-require_admin = RoleChecker([UserRole.ADMIN])
-
-db_obj = PostgresDependency()
 router = APIRouter(
     prefix="/companies",
-    tags=["companies"],
-    dependencies=[Depends(require_admin)]
+    tags=["companies"]
 )
-
-class CompanyRequest(BaseModel):
-    name: str
-    slug: str
-    is_active: bool = True
-
-class CompanyResponse(CompanyRequest):
-    id: uuid.UUID
-    created_at: datetime
-
-
-def get_company_service(session: Annotated[AsyncSession, Depends(db_obj.get_db_session)]) -> CompanyService:
-    return CompanyService(repository=CompanyRepositoryPostgres(session))
-
 
 @router.get(path="/v1", response_model=list[CompanyResponse])
 async def get_companies(
@@ -44,53 +21,48 @@ async def get_companies(
 ) -> list[CompanyResponse]:
     return await service.get_companies(offset=offset, limit=limit)
 
-@router.post(path="/v1", response_model=CompanyResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    path="/v1",
+    response_model=CompanyResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)]
+)
 async def add_company(
         company: CompanyRequest,
         service: Annotated[CompanyService, Depends(get_company_service)]
 ) -> CompanyResponse:
-    domain_company = Company(
-        name=company.name,
-        slug=company.slug,
-        is_active=company.is_active
-    )
-    request = await service.add_company(domain_company)
-    if request is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Компания уже есть в базе"
-        )
-    return request
+    domain_company = Company(name=company.name, slug=company.slug, is_active=company.is_active)
+    result = await service.add_company(domain_company)
+    if result is None:
+        raise HTTPException(status_code=409, detail="Компания уже есть в базе")
+    return result
 
-
-@router.delete(path="/v1/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    path="/v1/{company_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)]
+)
 async def delete_company(
         company_id: uuid.UUID,
         service: Annotated[CompanyService, Depends(get_company_service)]
 ):
-    request = await service.delete_company(company_id)
-    if request is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Компания не найдена"
-        )
+    result = await service.delete_company(company_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Компания не найдена")
 
-
-@router.put(path="/v1/{company_id}", response_model=CompanyResponse, status_code=status.HTTP_200_OK)
+@router.put(
+    path="/v1/{company_id}",
+    response_model=CompanyResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_admin)]
+)
 async def update_company(
         company_id: uuid.UUID,
         new_company: CompanyRequest,
         service: Annotated[CompanyService, Depends(get_company_service)]
 ) -> CompanyResponse:
-    domain_company = Company(
-        name=new_company.name,
-        slug=new_company.slug,
-        is_active=new_company.is_active
-    )
-    request = await service.update_company(company_id, domain_company)
-    if request is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Компания не найдена"
-        )
-    return request
+    domain_company = Company(name=new_company.name, slug=new_company.slug, is_active=new_company.is_active)
+    result = await service.update_company(company_id, domain_company)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Компания не найдена")
+    return result

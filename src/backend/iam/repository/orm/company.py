@@ -1,7 +1,7 @@
 from dataclasses import asdict
 
-from domain.models.company import Company
-from repository.models.company import CompanyDB
+from iam.domain.models.company import Company
+from iam.repository.models.company import CompanyDB
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 

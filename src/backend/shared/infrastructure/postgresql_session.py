@@ -2,14 +2,9 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from adapters.config.settings import Config
-
 
 class PostgresDependency:
-    def __init__(self) -> None:
-        config = Config.load()
-        db_url = f"postgresql+asyncpg://{config.db.user.get_secret_value()}:{config.db.password.get_secret_value()}@{config.db.host}/{config.db.database}"
-
+    def __init__(self, db_url: str) -> None:
         self._engine = create_async_engine(
             db_url,
             pool_size=5,

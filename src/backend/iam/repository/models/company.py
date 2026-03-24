@@ -1,4 +1,4 @@
-from .base import Base
+from iam.repository.models.base import Base
 from sqlalchemy import Boolean, Column, DateTime, String, UUID
 from sqlalchemy.sql import func
 import uuid

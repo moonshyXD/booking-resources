@@ -3,15 +3,28 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from sqlalchemy import select, text
 
-from adapters.rest.auth import router as auth_router
-from adapters.auth.hasher import PasswordHasher
-from adapters.infrastructure.postgresql_session import PostgresDependency
-from adapters.rest.company import router as company_router
-from adapters.rest.user import router as user_router
+from iam.adapters.rest.auth import router as auth_router
+from iam.adapters.auth.hasher import PasswordHasher
+from shared.infrastructure.postgresql_session import PostgresDependency
+from iam.adapters.rest.company import router as company_router
+from iam.adapters.rest.user import router as user_router
 
-from repository.models.user import UserDB
+import uvicorn
+from iam.repository.models.user import UserDB
 
-db_dependency = PostgresDependency()
+from iam.adapters.config.settings import Config
+
+config = Config.load()
+
+db_url = (
+    f"postgresql+asyncpg://"
+    f"{config.db.user.get_secret_value()}:"
+    f"{config.db.password.get_secret_value()}@"
+    f"{config.db.host}/"
+    f"{config.db.database}"
+)
+
+db_dependency = PostgresDependency(db_url=db_url)
 
 
 @asynccontextmanager
@@ -72,6 +85,4 @@ def greet():
 
 
 if __name__ == "__main__":
-    import uvicorn
-
     uvicorn.run("main:app", host="0.0.0.0", port=8012, reload=True)

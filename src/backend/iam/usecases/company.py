@@ -1,4 +1,4 @@
-from domain.models.company import CompanyRepositoryI, Company
+from iam.domain.models.company import CompanyRepositoryI, Company
 
 
 class CompanyService:

@@ -1,4 +1,4 @@
-from domain.models.user import UserRepositoryI, User
+from iam.domain.models.user import UserRepositoryI, User
 
 
 class UserService:

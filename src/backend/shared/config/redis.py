@@ -8,7 +8,3 @@ class RedisConfig(BaseModel):
     @property
     def url(self) -> str:
         return f"redis://{self.host}:{self.port}/{self.db}"
-
-class FastapiConfig(BaseModel):
-    host: str
-    port: int

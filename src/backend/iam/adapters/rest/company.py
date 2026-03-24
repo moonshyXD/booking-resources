@@ -36,14 +36,13 @@ def get_company_service(session: Annotated[AsyncSession, Depends(db_obj.get_db_s
     return CompanyService(repository=CompanyRepositoryPostgres(session))
 
 
-@router.get(path="/v1", response_model=list[CompanyResponse], status_code=status.HTTP_200_OK)
+@router.get(path="/v1", response_model=list[CompanyResponse])
 async def get_companies(
     service: Annotated[CompanyService, Depends(get_company_service)],
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100)
 ) -> list[CompanyResponse]:
     return await service.get_companies(offset=offset, limit=limit)
-
 
 @router.post(path="/v1", response_model=CompanyResponse, status_code=status.HTTP_201_CREATED)
 async def add_company(

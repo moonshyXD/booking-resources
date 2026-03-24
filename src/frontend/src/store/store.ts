@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
+import organizationReducer from './organizationSlice'
 
 export const store = configureStore({
     reducer: {
-        // сюда будем добавлять слайсы
+        organization: organizationReducer,
     }
 })
 

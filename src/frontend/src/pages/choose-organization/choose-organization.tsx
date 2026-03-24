@@ -1,4 +1,6 @@
 import './choose-organization.css'
+import { useDispatch } from 'react-redux'
+import { setOrganization } from '../../store/organizationSlice'
 import { useQuery } from '@tanstack/react-query'
 import { fetchOrganizations, /*selectOrganization*/} from '../../api/organizationsApi'
 import type { Organization } from '../../types/organization'
@@ -6,6 +8,7 @@ import { useEffect, useState, type KeyboardEvent, type MouseEvent } from "react"
 import {useNavigate} from "react-router-dom";
 import ContentBox from '../../components/СontentBox/contentBox'
 import Wrapper from '../../components/Wrapper/wrapper'
+
 
 const ChooseOrganization = () => {
     const {data: organizations, isLoading, error} = useQuery({
@@ -17,10 +20,13 @@ const ChooseOrganization = () => {
     const [searchQuery, setSearchQuery] = useState('')
     const [isOpen, setIsOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
+    const dispatch = useDispatch()
 
     const handleSelect = (org: Organization) => {
         setSelectedOrg(org);
         setSearchQuery('');
+        dispatch(setOrganization(org))
+        localStorage.setItem('organizationId', org.id.toString())
     }
 
     const navigate = useNavigate()
@@ -29,6 +35,7 @@ const ChooseOrganization = () => {
 
         setIsSaving(true)
         setSearchQuery('')
+
 
         try{
            // await selectOrganization(selectedOrg.id)
@@ -49,13 +56,36 @@ const ChooseOrganization = () => {
             setSearchQuery('')
         }
     }, [isOpen])
+    useEffect(() => {
+        const savedId = localStorage.getItem('organizationId')
+        if (savedId && organizations) {
+            const savedOrg = organizations.find(org => org.id === parseInt(savedId))
+            if (savedOrg) {
+                setSelectedOrg(savedOrg)
+                dispatch(setOrganization(savedOrg))
+            }
+        }
+    }, [organizations])
 
-    if(isLoading) return <div className="default-text">Загрузка организаций...</div>
-    if (error) return <div className="default-text"> Ошибка загрузки</div>
+    if(isLoading) return (
+        <Wrapper>
+            <div className="choose-organization-page">
+                <div className="default-text">Загрузка организаций...</div>
+            </div>
+        </Wrapper>
+    )
+    if (error) return (
+        <Wrapper>
+            <div className="choose-organization-page">
+                <div className="default-text"> Ошибка загрузки</div>
+            </div>
+        </Wrapper>
+    )
 
     return(
         <Wrapper>
             <div
+                className="choose-organization-page"
                 tabIndex={0}
                 onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
                  const key = e.key
@@ -75,16 +105,9 @@ const ChooseOrganization = () => {
                     ВЫБЕРИТЕ ОРГАНИЗАЦИЮ
                 </label>
 
-                {selectedOrg && selectedOrg.name.length > 0 ? <i className="bi bi-x-lg icons" onClick={(e: MouseEvent<HTMLElement>) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setSelectedOrg(null);
-                }} style={{ cursor: 'pointer', marginLeft: 'auto' }}></i> : <i className="bi bi-chevron-down icons"></i>}
-
                 <div className="dropdown">
                     <button
-                        className="btn btn-secondary"
-                        style={{display: 'flex', alignItems: 'center', gap: '10px'}}
+                        className="btn btn-secondary choose-org-dropdown-btn"
                         type="button"
                         data-bs-toggle="dropdown"
                         onClick={() => setIsOpen(!isOpen)}
@@ -92,6 +115,20 @@ const ChooseOrganization = () => {
                         <div className="label-secondary">
                             {selectedOrg ? selectedOrg.name : <div className="selected-label">наименование организации</div>}
                         </div>
+                        {selectedOrg && selectedOrg.name.length > 0 ? (
+                            <i
+                                className="bi bi-x-lg choose-org-icon"
+                                onClick={(e: MouseEvent<HTMLElement>) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setSelectedOrg(null);
+                                }}
+                                role="button"
+                                aria-label="Сбросить выбор"
+                            />
+                        ) : (
+                            <i className="bi bi-chevron-down choose-org-icon" aria-hidden />
+                        )}
                     </button>
                     <ul className="dropdown-menu">
                         {filteredOrganizations?.length === 0 ? (

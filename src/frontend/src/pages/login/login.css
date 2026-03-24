@@ -1,4 +1,4 @@
-.main-text{
+.login-page .main-text{
     color: var(--gold);
     font-size: var(--font-title);
     margin-top: 10px;
@@ -6,7 +6,7 @@
     text-align: center;
 }
 
-.login-field {
+.login-page .login-field {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -17,14 +17,14 @@
 }
 
 
-.login-field .login-label {
+.login-page .login-field .login-label {
     margin: 0 0 8px 0;
     display: block;
     width: 100%;
     text-align: left;
 }
 
-.form-control{
+.login-page .form-control{
     background-color: var(--light-beige) !important;
     border: 2px solid var(--gold) !important;
     padding: 12px 20px !important;
@@ -33,7 +33,7 @@
     height: 66px!important;
 }
 
-.login-field .form-control {
+.login-page .login-field .form-control {
     margin-top: 0 !important;
     width: 100% !important;
     box-sizing: border-box;
@@ -45,37 +45,37 @@
     caret-color: var(--gold);
 }
 
-.login-field .form-control::placeholder {
+.login-page .login-field .form-control::placeholder {
     color: var(--very-light-blue);
     opacity: 0.3;
     font-size: var(--font-xs);
 }
 
-.login-field .form-control::-webkit-input-placeholder {
+.login-page .login-field .form-control::-webkit-input-placeholder {
     color: var(--very-light-blue);
     opacity: 0.3;
     font-size: var(--font-xs);
 }
 
-.login-field .form-control::-moz-placeholder {
+.login-page .login-field .form-control::-moz-placeholder {
     color: var(--very-light-blue);
     opacity: 0.3;
     font-size: var(--font-xs);
 }
 
-.form-label{
+.login-page .form-label{
     color: var(--light-beige) !important;
     font-size: var(--font-s);
     margin-top: 70px !important;
 
 }
 
-.login-field .form-label {
+.login-page .login-field .form-label {
     margin-top: 0 !important;
 }
 
 
-.button-to-entrance{
+.login-page .button-to-entrance{
     background-color: var(--gold) !important;
     border: 2px solid var(--light-beige) !important;
     color: var(--dark-blue) !important;
@@ -87,13 +87,23 @@
     border-radius: var(--radius) !important;
 }
 
-.icons{
-    margin-top: 60px !important;
-    margin-left: 700px !important;
+
+.login-page .login-field:has(.icons) {
+    position: relative;
+}
+.login-page .icons {
+
+    color: var(--light-blue);
+    font-size: var(--font-xl) !important;
+    position: absolute;
+    right: 14px;
+    bottom: 5px;
+    margin: 0 !important;
+    z-index: 2;
 }
 
 
-.forgot-pass{
+.login-page .forgot-pass{
     color: var(--dark-beige) !important;
     font-size: var(--font-xs);
     text-align: right !important;
@@ -101,7 +111,52 @@
     text-decoration: none;
     cursor: pointer;
 }
-.forgot-pass:hover {
+.login-page .forgot-pass:hover {
     color: var(--gold);
     text-decoration: underline;
+}
+
+
+.input-error {
+    border-color: #ff6b6b !important;
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3) !important;
+}
+
+.to-org{
+    color: var(--dark-beige) !important;
+    font-size: var(--font-s);
+    text-decoration: none;
+    cursor: pointer;
+    text-align: left;
+    margin-top: -60px !important;
+}
+
+.button-to-entrance:hover {
+    transform: scale(0.97);
+    background-color: var(--gold) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.to-org:hover {
+    color: var(--gold);
+    text-decoration: underline;
+}
+
+.errors-message{
+    position: absolute;
+    color: var(--just-red) !important;
+    font-size: var(--font-xs);
+    text-align: left !important;
+    margin-top: -5px !important;
+}
+
+
+.login-page .form-control-error{
+    background-color: var(--light-red) !important;
+    border: 2px solid var(--dark-red) !important;
+    padding: 12px 20px !important;
+    border-radius: var(--radius) !important;
+    width: 752px!important;
+    height: 66px!important;
+    font-size: var(--font-xs);
 }

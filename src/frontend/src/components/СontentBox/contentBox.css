@@ -1,0 +1,18 @@
+.content-box {
+    min-width: 0;
+
+    width: fit-content;
+    max-width: min(100%, 1200px);
+
+    height: auto;
+    min-height: 0;
+
+    box-sizing: border-box;
+    padding: 34px 62px;
+
+    background-color: var(--dark-blue);
+    border: 2px solid var(--gold);
+    border-radius: var(--radius);
+    text-align: center;
+    margin-top: 80px;
+}

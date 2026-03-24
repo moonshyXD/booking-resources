@@ -3,13 +3,17 @@ html, body {
     padding: 0;
     height: 100%;
 }
+
 body {
     background-image: url('/background.jpg');
     background-size: 100% auto;
     background-repeat: no-repeat;
     background-position: top center;
-
     font-family: "Vollkorn", serif;
+}
+
+#root {
+    min-height: 100%;
 }
 
 :root {
@@ -20,7 +24,7 @@ body {
     --light-beige: #F5F0E9;
     --dark-red: #8E0000;
     --light-red: #FFD2D2;
-    --just-red: #FF0000;
+    --just-red: #c50000;
     --very-light-blue: #13007F;
 
     --font-title: 40px;
@@ -32,4 +36,3 @@ body {
 
     --radius: 15px;
 }
-

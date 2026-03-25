@@ -5,4 +5,14 @@ dependencies = [
     "fastapi>=0.100.0",
     "uvicorn>=0.20.0",
     "pydantic-settings",
+    "smtplibaio>=2.1.2.post1",
+    "pydantic[email]>=2.12.5",
+    "aiosmtplib>=5.1.0"
+
+]
+
+[dependency-groups]
+dev = [
+    "pydantic[email]>=2.12.5",
+    "smtplibaio>=2.1.2.post1",
 ]

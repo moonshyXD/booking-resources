@@ -5,11 +5,16 @@ from typing import Annotated
 from iam.usecases.user import UserService
 from iam.repository.orm.user import UserRepositoryPostgres
 from iam.adapters.auth.hasher import PasswordHasher
+from iam.adapters.notifications.gateway import NotificationRedisGateway
 
 from iam.adapters.dependencies.general import get_db_session
 
 def get_user_service(session: Annotated[AsyncSession, Depends(get_db_session)]) -> UserService:
-    return UserService(repository=UserRepositoryPostgres(session))
+    return UserService(
+        repository=UserRepositoryPostgres(session),
+        hasher=PasswordHasher(),
+        gateway=NotificationRedisGateway()
+    )
 
 def get_hasher() -> PasswordHasher:
     return PasswordHasher()

@@ -29,7 +29,7 @@ class UserService:
         )
 
     async def add_user(self, user: User):
-        password = await self.hasher.get_password()
+        password = self.hasher.get_password()
         user.password_hash = self.hasher.get_password_hash(password)
 
         request = await self.repository.add_user(user)
@@ -41,7 +41,10 @@ class UserService:
         return request
 
     async def delete_user(self, user_id: uuid.UUID):
-        user_email = await self.repository.get_email_by_id(user_id)
+        user = await self.repository.get_user_by_id(user_id)
+        if user is None:
+            return None
+        user_email = user.email
 
         request = await self.repository.delete_user_by_id(user_id)
         if request is None:
@@ -62,7 +65,7 @@ class UserService:
         return request
 
     async def update_password(self, user_id: int, email: str):
-        password = await self.hasher.get_password()
+        password = self.hasher.get_password()
         password_hash = self.hasher.get_password_hash(password)
 
         request = await self.repository.update_password(user_id, password_hash)

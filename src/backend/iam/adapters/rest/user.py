@@ -48,30 +48,13 @@ async def add_user(
             raise HTTPException(status_code=403, detail="Доступ запрещен к чужой компании")
 
     password = hasher.get_password()
-    domain_user = map_to_domain_user(user, hasher.get_password_hash(password), "USER", user.company_id)
+    domain_user = map_to_domain_user(user, hasher.get_password_hash(password), UserRole.USER, user.company_id)
 
     result = await service.add_user(domain_user)
     if result is None:
         raise HTTPException(status_code=409, detail="Ошибка создания пользователя")
 
     logging.info(f"Сгенерированный пароль: {password}")
-    return result
-
-
-@router.post(path="/v1/admin", response_model=UserResponse, dependencies=[Depends(require_admin)])
-async def add_admin(
-        user: BaseUserRequest,
-        service: Annotated[UserService, Depends(get_user_service)],
-        hasher: Annotated[PasswordHasher, Depends(get_hasher)]
-) -> UserResponse:
-    password = hasher.get_password()
-    domain_user = map_to_domain_user(user, hasher.get_password_hash(password), UserRole.ADMIN)
-
-    result = await service.add_user(domain_user)
-    if result is None:
-        raise HTTPException(status_code=409, detail="Админ уже существует")
-
-    logging.info(f"Сгенерированный пароль админа: {password}")
     return result
 
 
@@ -85,7 +68,7 @@ async def add_company_admin(
     password = hasher.get_password()
     domain_user = map_to_domain_user(
         request_data=user, 
-        password_hash=hasher.get_password_hash(password), 
+        password_hash=hasher.get_password_hash(password),
         role=UserRole.COMPANY_ADMIN, 
         company_id=user.company_id
     )

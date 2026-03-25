@@ -8,7 +8,7 @@ class NotificationRedisGateway:
         self.redis = redis.from_url(redis_url)
         self.queue_name = "email_tasks_queue"
 
-    async def send_account_created(self, email: str, password: str):
+    async def send_created_account(self, email: str, password: str):
         task = {
             "event": "account_created",
             "payload": {

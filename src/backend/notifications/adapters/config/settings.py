@@ -1,16 +1,15 @@
 from typing import Self
-
+from pydantic import Field
 from pydantic_settings import BaseSettings, TomlConfigSettingsSource
-
 from shared.config.redis import RedisConfig
 from shared.config.web import FastapiConfig
-from adapters.config.smtp import SMTPConfig
+from notifications.adapters.config.smtp import SMTPConfig
 
 
 class Config(BaseSettings):
-    redis: RedisConfig
-    fastapi: FastapiConfig
-    smtp: SMTPConfig
+    # redis: RedisConfig
+    # fastapi: FastapiConfig
+    smtp: SMTPConfig = Field(default_factory=SMTPConfig)
 
     @classmethod
     def settings_customise_sources(

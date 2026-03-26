@@ -24,12 +24,7 @@ async def lifespan(app: FastAPI):
     except asyncio.CancelledError:
         pass
 
-app = FastAPI(lifespan=lifespan)
-
-@app.get("/")
-async def greet():
-    return {"message": "Hello World"}
-
+app = FastAPI(lifespan=lifespan, root_path="/notifications")
 
 app.include_router(smtp_router)
 

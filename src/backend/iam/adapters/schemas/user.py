@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 import uuid
 from datetime import datetime
 
 
 class BaseUserRequest(BaseModel):
-    email: str
+    email: EmailStr
     first_name: str | None = None
     last_name: str | None = None
     avatar_url: str | None = None
@@ -19,13 +19,13 @@ class UpdateUserRequest(CreateUserRequest):
 
 
 class UpdatePasswordRequest(BaseModel):
-    email: str
+    email: EmailStr
 
 
 class UserResponse(BaseModel):
     id: uuid.UUID
     company_id: uuid.UUID | None
-    email: str
+    email: EmailStr
     first_name: str | None = None
     last_name: str | None = None
     avatar_url: str | None = None

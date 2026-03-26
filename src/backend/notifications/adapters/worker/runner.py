@@ -3,11 +3,11 @@ import json
 from shared.infrastructure.logger import logging
 import redis.asyncio as redis
 from notifications.adapters.config.settings import Config
-from notifications.adapters.worker.handlers import AccountEventHandlers
+from notifications.usecases.worker.handlers import AccountEventHandlers
 from notifications.adapters.email.builder import AccountEmailBuilder
 from notifications.adapters.email.sender import EmailSender
 from notifications.usecases.account import AccountService
-from notifications.adapters.worker.event import EventDispatcher
+from notifications.usecases.worker.event import EventDispatcher
 
 config = Config.load()
 

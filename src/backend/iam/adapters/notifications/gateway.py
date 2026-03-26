@@ -16,11 +16,8 @@ class NotificationRedisGateway:
                 "password": password
             }
         }
-        try:
-            await self.redis.lpush(self.queue_name, json.dumps(task))
-            logging.info(f"Задача 'создание аккаунта' для {email} отправлена в очередь")
-        except Exception as e:
-            logging.error(f"Redis недоступен, задача для {email} потеряна: {e}")
+
+        await self.redis.lpush(self.queue_name, json.dumps(task))
 
     async def send_updated_password(self, email: str, password: str):
         task = {
@@ -30,11 +27,8 @@ class NotificationRedisGateway:
                 "password": password
             }
         }
-        try:
-            await self.redis.lpush(self.queue_name, json.dumps(task))
-            logging.info(f"Задача 'смена пароля' для {email} отправлена в очередь")
-        except Exception as e:
-            logging.error(f"Redis недоступен, задача для {email} потеряна: {e}")
+
+        await self.redis.lpush(self.queue_name, json.dumps(task))
 
     async def send_deleted_account(self, email: str):
         task = {
@@ -43,11 +37,8 @@ class NotificationRedisGateway:
                 "email": email
             }
         }
-        try:
-            await self.redis.lpush(self.queue_name, json.dumps(task))
-            logging.info(f"Задача 'удаление аккаунта' для {email} отправлена в очередь")
-        except Exception as e:
-            logging.error(f"Redis недоступен, задача для {email} потеряна: {e}")
+
+        await self.redis.lpush(self.queue_name, json.dumps(task))
 
     async def send_updated_account_data(self, email: str):
         task = {
@@ -56,8 +47,5 @@ class NotificationRedisGateway:
                 "email": email
             }
         }
-        try:
-            await self.redis.lpush(self.queue_name, json.dumps(task))
-            logging.info(f"Задача 'обновление профиля' для {email} отправлена в очередь")
-        except Exception as e:
-            logging.error(f"Redis недоступен, задача для {email} потеряна: {e}")
+
+        await self.redis.lpush(self.queue_name, json.dumps(task))

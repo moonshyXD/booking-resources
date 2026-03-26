@@ -35,11 +35,11 @@ async def login(
 
     response.set_cookie(
         key="access_token", value=tokens["access_token"],
-        httponly=True, secure=True, samesite="lax", max_age=3600
+        httponly=True, secure=True, samesite="lax", max_age=3600, path="/"
     )
     response.set_cookie(
         key="refresh_token", value=tokens["refresh_token"],
-        httponly=True, secure=True, samesite="lax", max_age=30 * 24 * 3600
+        httponly=True, secure=True, samesite="lax", max_age=30 * 24 * 3600, path="/"
     )
 
     return LoginResponse(
@@ -56,13 +56,15 @@ async def logout(
         payload: dict = Depends(get_current_user_payload),
 ):
     access_token = request.cookies.get("access_token")
+    refresh_token = request.cookies.get("refresh_token")
 
     if access_token:
         expire_timestamp = payload.get("exp")
         if expire_timestamp:
             await blacklist.add_token(access_token, expire_timestamp)
+            await blacklist.add_token(refresh_token, expire_timestamp)
 
-    response.delete_cookie("access_token", httponly=True, secure=True, samesite="lax")
-    response.delete_cookie("refresh_token", httponly=True, secure=True, samesite="lax")
+    response.delete_cookie("access_token", httponly=True, secure=True, samesite="lax", path="/")
+    response.delete_cookie("refresh_token", httponly=True, secure=True, samesite="lax", path="/")
 
     return {"message": "Вы успешно вышли из системы"}

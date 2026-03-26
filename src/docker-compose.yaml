@@ -83,8 +83,10 @@ services:
     ports:
       - "8007:8013"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
     environment:
       - PYTHONPATH=/usr/app/backend
       - API_URL_CATALOG=${API_URL_CATALOG}
@@ -97,8 +99,10 @@ services:
     ports:
       - "8008:8014"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
     environment:
       - PYTHONPATH=/usr/app/backend
       - API_URL_BOOKING=${API_URL_BOOKING}
@@ -111,9 +115,12 @@ services:
     ports:
       - "8010:8011"
     depends_on:
-      - iam
-      - catalog
-      - booking
+      iam:
+        condition: service_started
+      catalog:
+        condition: service_started
+      booking:
+        condition: service_started
     environment:
       - PYTHONPATH=/usr/app/backend
       - API_URL_NOTIFICATIONS=${API_URL_NOTIFICATIONS}
@@ -123,12 +130,29 @@ services:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
-    ports:
-      - "8001:5173"
+    expose:
+      - "5173"
     depends_on:
-      - notifications
+      notifications:
+        condition: service_started
     environment:
       - API_URL_FRONTEND=${API_URL_FRONTEND}
+
+  caddy:
+    container_name: caddy
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      frontend:
+        condition: service_started
+      iam:
+        condition: service_started
+      notifications:
+        condition: service_started
+    restart: unless-stopped
 
 volumes:
   postgres_data:

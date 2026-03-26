@@ -7,6 +7,10 @@ localhost {
         reverse_proxy localhost:8010
     }
 
+    handle /frontend* {
+        reverse_proxy localhost:8001
+    }
+
     handle {
         respond "Route not found" 404
     }

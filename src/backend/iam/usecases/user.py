@@ -1,11 +1,21 @@
-from domain.models.user import UserRepositoryI, User
+from iam.domain.models.user import UserRepositoryI, User
+from iam.domain.auth.hasher import PasswordHasherI
+from iam.domain.notifications.gateway import NotificationGatewayI
+import uuid
 
 
 class UserService:
-    def __init__(self, repository: UserRepositoryI):
+    def __init__(
+            self,
+            repository: UserRepositoryI,
+            hasher: PasswordHasherI,
+            notifications: NotificationGatewayI
+    ):
         self.repository = repository
+        self.hasher = hasher
+        self.notifications = notifications
 
-    def create_domain_user(self, user_data: dict, password: str, password_hash: str, role: str) -> User:
+    def create_domain_user(self, user_data: dict, password_hash: str, role: str) -> User:
         return User(
             company_id=user_data.get("company_id"),
             email=user_data.get("email"),
@@ -19,30 +29,50 @@ class UserService:
         )
 
     async def add_user(self, user: User):
+        password = self.hasher.get_password()
+        user.password_hash = self.hasher.get_password_hash(password)
+
         request = await self.repository.add_user(user)
         if request is None:
             return None
 
+        await self.notifications.send_created_account(email=user.email, password=password)
+
         return request
 
-    async def delete_user(self, user_id: int):
+    async def delete_user(self, user_id: uuid.UUID):
+        user = await self.repository.get_user_by_id(user_id)
+        if user is None:
+            return None
+        user_email = user.email
+
         request = await self.repository.delete_user_by_id(user_id)
         if request is None:
             return None
 
+        if user_email:
+             await self.notifications.send_deleted_account(email=user_email)
+
         return request
 
-    async def update_user(self, user_id: int, new_user: User):
+    async def update_user(self, user_id: uuid.UUID, new_user: User):
         request = await self.repository.update_user_by_id(user_id, new_user)
         if request is None:
             return None
 
+        await self.notifications.send_updated_account_data(email=new_user.email)
+
         return request
 
-    async def update_password(self, user_id: int, password_hash: str):
+    async def update_password(self, user_id: int, email: str):
+        password = self.hasher.get_password()
+        password_hash = self.hasher.get_password_hash(password)
+
         request = await self.repository.update_password(user_id, password_hash)
         if request is None:
             return None
+
+        await self.notifications.send_updated_password(email=email, password=password)
 
         return request
 

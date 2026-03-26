@@ -45,11 +45,11 @@ services:
       sh -c '
         mkdir -p /usr/local/etc/redis &&
         echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
-        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+        echo "requirepass $$REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
         echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
         echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
         echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
-        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        echo "user $$REDIS_USER on >$$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
         redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
       '
     healthcheck:
@@ -58,67 +58,56 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
-    tty: true
-    stdin_open: true
 
   iam:
     container_name: iam
     build:
-      dockerfile: ./Dockerfile
-      context: ./backend/iam
+      context: ./backend
+      dockerfile: ./iam/Dockerfile
     ports:
       - "8006:8012"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
+      - PYTHONPATH=/usr/app/backend
       - API_URL_IAM=${API_URL_IAM}
 
   catalog:
     container_name: catalog
     build:
-      dockerfile: ./Dockerfile
-      context: ./backend/catalog
+      context: ./backend
+      dockerfile: ./catalog/Dockerfile
     ports:
       - "8007:8013"
     depends_on:
       - postgres
       - redis
     environment:
+      - PYTHONPATH=/usr/app/backend
       - API_URL_CATALOG=${API_URL_CATALOG}
 
   booking:
     container_name: booking
     build:
-      dockerfile: ./Dockerfile
-      context: ./backend/booking
+      context: ./backend
+      dockerfile: ./booking/Dockerfile
     ports:
       - "8008:8014"
     depends_on:
       - postgres
       - redis
     environment:
+      - PYTHONPATH=/usr/app/backend
       - API_URL_BOOKING=${API_URL_BOOKING}
-
-  analytics:
-    container_name: analytics
-    build:
-      dockerfile: ./Dockerfile
-      context: ./backend/analytics
-    ports:
-      - "8009:8015"
-    depends_on:
-      - iam
-      - catalog
-      - booking
-    environment:
-      - API_URL_ANALYTICS=${API_URL_ANALYTICS}
 
   notifications:
     container_name: notifications
     build:
-      dockerfile: ./Dockerfile
-      context: ./backend/notifications
+      context: ./backend
+      dockerfile: ./notifications/Dockerfile
     ports:
       - "8010:8011"
     depends_on:
@@ -126,13 +115,14 @@ services:
       - catalog
       - booking
     environment:
+      - PYTHONPATH=/usr/app/backend
       - API_URL_NOTIFICATIONS=${API_URL_NOTIFICATIONS}
 
   frontend:
     container_name: frontend
     build:
-      dockerfile: ./Dockerfile
       context: ./frontend
+      dockerfile: ./Dockerfile
     ports:
       - "8001:5173"
     depends_on:
@@ -140,10 +130,6 @@ services:
     environment:
       - API_URL_FRONTEND=${API_URL_FRONTEND}
 
-  
-
 volumes:
   postgres_data:
   redis_data:
-
-  

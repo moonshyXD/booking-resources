@@ -3,7 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 from dataclasses import dataclass
 from datetime import datetime
-from domain.models.user_role import UserRole
+from iam.domain.models.user_role import UserRole
 from typing import Protocol
 
 @dataclass

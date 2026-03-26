@@ -1,14 +1,9 @@
+
 from datetime import datetime, timezone
 from redis.asyncio import Redis
-from fastapi import Depends
-
-
-from adapters.infrastructure.redis.redis_session import RedisDependency
-
-redis_obj = RedisDependency()
 
 class TokenBlacklistAdapter:
-    def __init__(self, redis_client: Redis = Depends(redis_obj.get_redis_session)):
+    def __init__(self, redis_client: Redis):
         self.redis = redis_client
 
     async def add_token(self, token: str, expire_timestamp: int) -> None:

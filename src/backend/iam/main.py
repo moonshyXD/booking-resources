@@ -3,15 +3,28 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from sqlalchemy import select, text
 
-from adapters.rest.auth import router as auth_router
-from adapters.auth.hasher import PasswordHasher
-from adapters.infrastructure.postgresql_session import PostgresDependency
-from adapters.rest.company import router as company_router
-from adapters.rest.user import router as user_router
+from iam.adapters.rest.auth import router as auth_router
+from iam.adapters.auth.hasher import PasswordHasher
+from shared.infrastructure.postgresql_session import PostgresDependency
+from iam.adapters.rest.company import router as company_router
+from iam.adapters.rest.user import router as user_router
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+from iam.repository.models.user import UserDB
 
-from repository.models.user import UserDB
+from iam.adapters.config.settings import Config
 
-db_dependency = PostgresDependency()
+config = Config.load()
+
+db_url = (
+    f"postgresql+asyncpg://"
+    f"{config.db.user.get_secret_value()}:"
+    f"{config.db.password.get_secret_value()}@"
+    f"{config.db.host}/"
+    f"{config.db.database}"
+)
+
+db_dependency = PostgresDependency(db_url=db_url)
 
 
 @asynccontextmanager
@@ -60,18 +73,26 @@ async def lifespan(app: FastAPI):
 
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, root_path="/iam")
+
+origins = [
+    "http://127.0.0.1:8001",
+    "https://127.0.0.1:8001",
+    "http://localhost:8001",
+    "https://localhost:8001",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["Content-Type", "Set-Cookie", "Authorization", "Access-Control-Allow-Origin"],
+)
 
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(company_router)
 
-@app.get("/")
-def greet():
-    return {"data": "Hello World"}
-
-
 if __name__ == "__main__":
-    import uvicorn
-
     uvicorn.run("main:app", host="0.0.0.0", port=8012, reload=True)

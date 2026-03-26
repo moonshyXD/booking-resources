@@ -1,9 +1,9 @@
 from dataclasses import asdict
 
-from domain.models.user import User
-from repository.models.user import UserDB
+from iam.domain.models.user import User
+from iam.repository.models.user import UserDB
 from sqlalchemy.ext.asyncio import AsyncSession
-from repository.models.company import CompanyDB
+from iam.repository.models.company import CompanyDB
 from sqlalchemy import select
 
 

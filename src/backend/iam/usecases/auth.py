@@ -1,7 +1,8 @@
-from domain.auth.hasher import PasswordHasherI
-from domain.auth.token import TokenProviderI
-from domain.models.user import UserRepositoryI
-from domain.models.company import CompanyRepositoryI
+from iam.domain.auth.hasher import PasswordHasherI
+from iam.domain.auth.token import TokenProviderI
+from iam.domain.models.user import UserRepositoryI
+from iam.domain.models.company import CompanyRepositoryI
+from shared.auth.blacklist import TokenBlacklistAdapter
 
 
 class AuthService:
@@ -10,12 +11,14 @@ class AuthService:
             hasher: PasswordHasherI,
             token_provider: TokenProviderI,
             repository: UserRepositoryI,
-            company_repository: CompanyRepositoryI = None
+            company_repository: CompanyRepositoryI = None,
+            blacklist: TokenBlacklistAdapter = None
     ):
         self.hasher = hasher
         self.token_provider = token_provider
         self.repository = repository
         self.company_repository = company_repository
+        self.blacklist = blacklist
 
     async def authenticate(self, email: str, password: str, company_slug: str | None = None) -> dict | None:
         user = await self.repository.get_user_by_email(email)

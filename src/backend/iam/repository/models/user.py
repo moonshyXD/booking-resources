@@ -1,4 +1,4 @@
-from repository.models.base import Base
+from iam.repository.models.base import Base
 from sqlalchemy import (
     Boolean,
     Column,
@@ -8,7 +8,7 @@ from sqlalchemy import (
     UUID
 )
 from sqlalchemy.sql import func
-from domain.models.user_role import UserRole
+from iam.domain.models.user_role import UserRole
 import uuid
 
 

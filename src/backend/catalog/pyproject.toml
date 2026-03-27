@@ -1,0 +1,39 @@
+[project]
+name = "catalog"
+version = "0.1.0"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "bcrypt>=5.0.0",
+    "fastapi[standard]>=0.133.1",
+    "Faker>=18.4.0",
+    "mypy>=1.19.1",
+    "passlib[bcrypt]>=1.7.4",
+    "pwdlib[argon2,bcrypt]>=0.3.0",
+    "sqlalchemy>=2.0.44",
+    "pydantic-settings>=2.13.1",
+    "python-decouple>=3.8",
+    "ruff>=0.15.5",
+    "redis>=7.3.0",
+    "pyjwt>=2.11.0",
+    "uvicorn>=0.41.0",
+]
+
+[tool.ruff]
+line-length = 79
+target-version = 'py312'
+
+[tool.ruff.lint]
+fixable = ['ALL']
+select = ['E', 'F', 'I', 'B', 'Q']
+ignore = ['E101']
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.mypy]
+python_version = '3.12'
+disallow_untyped_defs = true
+ignore_missing_imports = true
+strict_optional = true

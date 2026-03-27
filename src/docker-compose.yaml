@@ -10,6 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -74,6 +75,15 @@ services:
     environment:
       - PYTHONPATH=/usr/app/backend
       - API_URL_IAM=${API_URL_IAM}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/habrdb
+    command: >
+      sh -c "
+        cd /usr/app/backend/iam &&
+        alembic upgrade head &&
+        cd /usr/app/backend &&
+        python -m iam.scripts.seed &&
+        python -m uvicorn iam.main:app --host 0.0.0.0 --port 8012
+      "
 
   catalog:
     container_name: catalog
@@ -84,12 +94,22 @@ services:
       - "8007:8013"
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     environment:
       - PYTHONPATH=/usr/app/backend
       - API_URL_CATALOG=${API_URL_CATALOG}
+      - POSTGRES_DATABASE=resource_db
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/resource_db
+    command: >
+      sh -c "
+        cd /usr/app/backend/catalog &&
+        alembic upgrade head &&
+        cd /usr/app/backend &&
+        python -m catalog.scripts.seed &&
+        python -m uvicorn catalog.main:app --host 0.0.0.0 --port 8013
+      "
 
   booking:
     container_name: booking

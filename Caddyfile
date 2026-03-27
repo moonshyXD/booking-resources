@@ -7,6 +7,10 @@ localhost {
         reverse_proxy localhost:8010
     }
 
+    handle_path /catalog* {
+        reverse_proxy catalog:8013
+    }
+
     handle /frontend/* {
         reverse_proxy localhost:8001
     }

@@ -5,6 +5,7 @@ dependencies = [
     "alembic>=1.18.4",
     "asyncpg>=0.31.0",
     "bcrypt>=5.0.0",
+    "Faker>=18.4.0",
     "fastapi[standard]>=0.133.1",
     "mypy>=1.19.1",
     "passlib[bcrypt]>=1.7.4",

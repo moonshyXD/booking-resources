@@ -44,7 +44,7 @@ function App() {
   }, [dispatch, meEndpoint])
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/frontend">
       <Routes>
         <Route path="/" element={<ChooseOrganization />} />
         <Route path="/login" element={<Login />} />

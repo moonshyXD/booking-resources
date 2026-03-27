@@ -1,5 +1,5 @@
 export const forgotPassword = async (email: string) => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8006'
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'https://localhost/iam'
 
     const response = await fetch(`${apiBaseUrl}/users/v1/password`, {
         method: 'PATCH',

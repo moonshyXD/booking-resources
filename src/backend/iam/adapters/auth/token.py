@@ -27,7 +27,7 @@ class TokenProvider:
 
     def create_refresh_token(self, data: dict) -> str:
         to_encode = data.copy()
-        time_delta = timedelta(days=30)
+        time_delta = timedelta(days=1)
 
         expire = datetime.now(timezone.utc) + time_delta
         to_encode.update({"exp": expire, "type": "refresh"})

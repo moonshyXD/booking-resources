@@ -7,6 +7,7 @@ COPY ./shared ./shared
 COPY ./booking/pyproject.toml ./booking/
 RUN pip install --no-cache-dir ./booking
 
+
 COPY ./booking ./booking
 
 ENV PYTHONPATH=/usr/app/backend

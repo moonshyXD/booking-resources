@@ -32,6 +32,9 @@ class UserService:
         password = self.hasher.get_password()
         user.password_hash = self.hasher.get_password_hash(password)
 
+        if user.email == "" or user.last_name == "" or user.first_name == "":
+            return None
+
         request = await self.repository.add_user(user)
         if request is None:
             return None

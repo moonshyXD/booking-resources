@@ -1,50 +1,17 @@
-:80 {
-    encode gzip zstd
-
-    @login path /api/login
-    handle @login {
-        uri replace /api/login /auth/v1/login
-        reverse_proxy iam:8012
+localhost {
+    handle_path /iam* {
+        reverse_proxy localhost:8006
     }
 
-    @forgot_password path /api/forgot-password
-    handle @forgot_password {
-        uri replace /api/forgot-password /users/v1/password
-        method PATCH
-        reverse_proxy iam:8012
+    handle_path /notifications* {
+        reverse_proxy localhost:8010
     }
 
-    @select_organization path /api/select-organization
-    handle @select_organization {
-        header Content-Type application/json
-        respond "{\"status\":\"ok\"}" 200
-    }
-
-    handle_path /iam/* {
-        reverse_proxy iam:8012
-    }
-
-    handle_path /notifications/* {
-        reverse_proxy notifications:8011
-    }
-
-    @iam path /auth/* /users/* /companies/*
-    handle @iam {
-        reverse_proxy iam:8012
-    }
-
-    @notifications path /account/*
-    handle @notifications {
-        reverse_proxy notifications:8011
-    }
-
-    @unknown_api path /api/*
-    handle @unknown_api {
-        header Content-Type application/json
-        respond "{\"detail\":\"Route is not configured in Caddy\"}" 404
+    handle /frontend/* {
+        reverse_proxy localhost:8001
     }
 
     handle {
-        reverse_proxy frontend:5173
+        respond "Route not found" 404
     }
 }

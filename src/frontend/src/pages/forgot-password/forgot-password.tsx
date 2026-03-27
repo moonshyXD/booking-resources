@@ -4,6 +4,7 @@ import { useState } from "react";
 import "./forgot-password.css"
 import {useNavigate} from "react-router-dom";
 import { z } from "zod";
+import { forgotPassword } from '../../api/forgotPassApi'
 
 
 const forgotPasswordSchema = z.object({
@@ -45,34 +46,15 @@ const ForgotPassword = () => {
         setValidationMessage('')
 
         try {
-            const response = await fetch('/api/forgot-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: email.trim() }),
-            })
-
-            let data: { message?: string } = {}
-            try {
-                data = await response.json()
-            } catch {
-                data = {}
-            }
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    setErrors({ email: 'error' })
-                    setValidationMessage('Аккаунт не найден')
-                } else {
-                    setValidationMessage(data.message || 'Ошибка восстановления пароля')
-                }
-                return
-            }
-
+            await forgotPassword(email.trim())
             navigate('/forgot-password/success')
-        } catch {
-            setValidationMessage('Ошибка соединения с сервером')
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Ошибка восстановления пароля'
+
+            if (message === 'Аккаунт не найден') {
+                setErrors({ email: 'error' })
+            }
+            setValidationMessage(message)
         } finally {
             setIsLoading(false)
         }

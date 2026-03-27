@@ -14,7 +14,6 @@ from iam.domain.models.user import User
 from iam.domain.models.user_role import UserRole
 from iam.usecases.user import UserService
 from iam.adapters.auth.hasher import PasswordHasher
-from shared.infrastructure.logger import logging
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -24,7 +23,7 @@ def map_to_domain_user(request_data: BaseUserRequest, password_hash: str, role: 
     return User(
         company_id=company_id, email=request_data.email, password_hash=password_hash,
         first_name=request_data.first_name, last_name=request_data.last_name,
-        avatar_url=request_data.avatar_url, role=role, is_active=True
+        avatar_url="", role=role, is_active=True
     )
 
 
@@ -40,21 +39,20 @@ async def get_users(
 async def add_user(
         user: CreateUserRequest,
         service: Annotated[UserService, Depends(get_user_service)],
-        hasher: Annotated[PasswordHasher, Depends(get_hasher)],
         current_user: Annotated[dict, Depends(require_admin_or_company_admin)]
 ) -> UserResponse:
     if current_user.get("role") == UserRole.COMPANY_ADMIN:
         if str(user.company_id) != str(current_user.get("company_id")):
             raise HTTPException(status_code=403, detail="Доступ запрещен к чужой компании")
 
-    password = hasher.get_password()
-    domain_user = map_to_domain_user(user, hasher.get_password_hash(password), UserRole.USER, user.company_id)
-
+    domain_user = map_to_domain_user(user, "", UserRole.USER, user.company_id)
     result = await service.add_user(domain_user)
     if result is None:
-        raise HTTPException(status_code=409, detail="Ошибка создания пользователя")
+        raise HTTPException(
+            status_code=409,
+            detail="Ошибка создания пользователя. Заполните все поля и проверьте правильность ввёдённого логина, пароля и адреса почты"
+        )
 
-    logging.info(f"Сгенерированный пароль: {password}")
     return result
 
 
@@ -63,12 +61,10 @@ async def add_user(
 async def add_company_admin(
         user: CreateUserRequest,
         service: Annotated[UserService, Depends(get_user_service)],
-        hasher: Annotated[PasswordHasher, Depends(get_hasher)],
 ) -> UserResponse:
-    password = hasher.get_password()
     domain_user = map_to_domain_user(
         request_data=user, 
-        password_hash=hasher.get_password_hash(password),
+        password_hash="",
         role=UserRole.COMPANY_ADMIN, 
         company_id=user.company_id
     )
@@ -77,10 +73,9 @@ async def add_company_admin(
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Пользователь уже есть в базе или указана несуществующая компания"
+            detail="Ошибка создания пользователя. Заполните все поля и проверьте правильность ввёдённого логина, пароля и адреса почты"
         )
 
-    logging.info(f"Сгенерированный пароль администратора компании: {password}")
     return result
 
 
@@ -137,14 +132,11 @@ async def update_user(
 async def update_password(
         request_data: UpdatePasswordRequest,
         service: Annotated[UserService, Depends(get_user_service)],
-        hasher: Annotated[PasswordHasher, Depends(get_hasher)],
 ) -> UserResponse:
     user_id = await service.repository.get_id_by_email(request_data.email)
     if not user_id:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
-    password = hasher.get_password()
-    updated_user = await service.update_password(user_id, hasher.get_password_hash(password))
+    updated_user = await service.update_password(user_id, request_data.email)
 
-    logging.info(f"Новый пароль для {user_id}: {password}")
     return updated_user

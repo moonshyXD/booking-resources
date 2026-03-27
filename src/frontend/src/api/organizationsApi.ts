@@ -1,36 +1,36 @@
 import type { Organization } from '../types/organization'
 
-// Временные данные, пока нет бэкенда
-const MOCK_ORGANIZATIONS: Organization[] = [
-    { id: 1, name: 'Холдинг TI' },
-    { id: 2, name: 'Т-банк' },
-    { id: 3, name: 'WB' },
-    { id: 4, name: 'OZON' },
-    { id: 5, name: 'Yandex' },
-    { id: 6, name: 'IT-центр' },
-]
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8006'
 
-export const fetchOrganizations = async (): Promise<Organization[]> => {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+const parseJsonSafely = <T>(raw: string): T | null => {
+    if (!raw.trim()) {
+        return null
+    }
 
-    return MOCK_ORGANIZATIONS
-
-    // const response = await fetch('/api/organizations')
-    // if (!response.ok) throw new Error('Ошибка загрузки организаций')
-    // return response.json()
+    try {
+        return JSON.parse(raw) as T
+    } catch {
+        return null
+    }
 }
 
-
-export const selectOrganization = async (orgId: number): Promise<void> => {
-    const response = await fetch('/api/select-organization', {
-        method: 'POST',
+export const fetchOrganizations = async (): Promise<Organization[]> => {
+    const response = await fetch(`${API_BASE_URL}/companies/v1`, {
+        method: 'GET',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({organizationId: orgId}),
     })
 
     if (!response.ok) {
-        throw new Error("Ошибка при выборе организации")
+        throw new Error('Ошибка загрузки организаций')
     }
+
+    const raw = await response.text()
+    const data = parseJsonSafely<Organization[]>(raw)
+    return data ?? []
 }
+
+
+export const selectOrganization = async (_orgId: string): Promise<void> => Promise.resolve()

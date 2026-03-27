@@ -6,6 +6,7 @@ COPY ./iam/pyproject.toml ./iam/
 
 RUN pip install --no-cache-dir ./iam
 
+
 COPY ./shared ./shared
 COPY ./iam ./iam
 

@@ -4,8 +4,10 @@ import { useState } from "react";
 import "./login.css"
 import {useNavigate} from "react-router-dom";
 import {z} from "zod"
-import { useSelector } from 'react-redux'
-import type {RootState} from '../../store/store';
+import { useDispatch, useSelector } from 'react-redux'
+import type {AppDispatch, RootState} from '../../store/store';
+import { auth } from '../../api/loginApi'
+import { setAuthError, setAuthLoading, setCurrentUser, setLastEmail } from '../../store/authSlice'
 
 
 const loginSchema = z.object({
@@ -18,19 +20,22 @@ const loginSchema = z.object({
 
 
 const Login = () => {
-    const [email, setEmail] = useState('')
+    const dispatch = useDispatch<AppDispatch>()
+    const lastEmail = useSelector((state: RootState) => state.auth.lastEmail)
+    const authError = useSelector((state: RootState) => state.auth.error)
+    const isLoading = useSelector((state: RootState) => state.auth.isLoading)
+    const [email, setEmail] = useState(lastEmail)
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [errors, setErrors] = useState<{email?: string; password?: string}>({})
     const [validationMessage, setValidationMessage] = useState('')
-    const [serverError, setServerError] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
     const selectedOrg = useSelector((state: RootState) => state.organization.selectedOrg)
-    const organizationId = selectedOrg?.id
+    const selectedOrgSlug = useSelector((state: RootState) => state.organization.selectedOrgSlug)
+    const organizationSlug = selectedOrg?.slug ?? selectedOrgSlug ?? localStorage.getItem('organizationSlug')
 
 
     const validate = () => {
-        setServerError('')
+        dispatch(setAuthError(null))
         const trimmedEmail = email.trim()
         const trimmedPassword = password.trim()
 
@@ -83,37 +88,34 @@ const Login = () => {
         if (!validate()) return
         console.log('Отправка на сервер:', {email, password})
 
-        setIsLoading(true)
-        setServerError('')
+        dispatch(setAuthLoading(true))
+        dispatch(setAuthError(null))
         setValidationMessage('')
 
-        try{
-            const response = await fetch('/api/login' /*вот тут жду инфу от бека*/, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password, organizationId})})
-            const data = await response.json()
+        try {
+            const data = await auth({
+                email: email.trim(),
+                password: password.trim(),
+                company_slug: organizationSlug ?? null,
+            })
 
-            if (response.ok) {
-                console.log('Успех:', data)
-                if (data.token) {
-                    localStorage.setItem('token', data.token)
-                }
-                navigateToCatalog()
-            } else {
-                setServerError(data.message || 'Неверный логин или пароль')
-                setErrors({
-                    email: 'error',
-                    password: 'error'
-                })
+            console.log('Успех:', data)
+            if (data.role) {
+                localStorage.setItem('role', data.role)
             }
-
-        }catch (error) {
-            setServerError('Ошибка соединения с сервером')
+            localStorage.setItem('lastEmail', email.trim())
+            dispatch(setLastEmail(email.trim()))
+            dispatch(setCurrentUser({ email: email.trim(), role: data.role }))
+            navigateToCatalog()
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Неверный логин или пароль'
+            dispatch(setAuthError(errorMessage || 'Неверный логин или пароль'))
+            setErrors({
+                email: 'error',
+                password: 'error'
+            })
         } finally {
-            setIsLoading(false)
+            dispatch(setAuthLoading(false))
         }
 
     }
@@ -158,8 +160,10 @@ const Login = () => {
 
                     <div className="forgot-pass" onClick={navigateToForgotPassword}> Забыли пароль?</div>
                     {validationMessage && <div className="errors-message">{validationMessage}</div>}
-                    {serverError && <div className="errors-message">{serverError}</div>}
-                    <button type="submit" className="btn button-to-entrance" disabled={isLoading} > ВОЙТИ</button>
+                    {authError && <div className="errors-message">{authError}</div>}
+                    <button type="submit" className="btn button-to-entrance" disabled={isLoading}>
+                        {isLoading ? 'Загрузка...' : 'ВОЙТИ'}
+                    </button>
                     <div className="to-org" onClick={navigateToChooseOrg}> &lt;&lt;НАЗАД</div>
                 </form>
             </ContentBox>

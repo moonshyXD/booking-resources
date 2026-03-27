@@ -6,6 +6,7 @@ COPY ./notifications/pyproject.toml ./notifications/
 
 RUN pip install --no-cache-dir ./notifications
 
+
 # 3. Копируем остальное
 COPY ./shared ./shared
 COPY ./notifications ./notifications

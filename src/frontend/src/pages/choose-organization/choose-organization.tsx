@@ -1,13 +1,14 @@
 import './choose-organization.css'
-import { useDispatch } from 'react-redux'
-import { setOrganization } from '../../store/organizationSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { clearOrganization, setOrganization, setOrganizationError, setOrganizationLoading } from '../../store/organizationSlice'
 import { useQuery } from '@tanstack/react-query'
-import { fetchOrganizations, /*selectOrganization*/} from '../../api/organizationsApi'
+import { fetchOrganizations } from '../../api/organizationsApi'
 import type { Organization } from '../../types/organization'
 import { useEffect, useState, type KeyboardEvent, type MouseEvent } from "react";
 import {useNavigate} from "react-router-dom";
 import ContentBox from '../../components/СontentBox/contentBox'
 import Wrapper from '../../components/Wrapper/wrapper'
+import type { RootState } from '../../store/store'
 
 
 const ChooseOrganization = () => {
@@ -21,12 +22,14 @@ const ChooseOrganization = () => {
     const [isOpen, setIsOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const dispatch = useDispatch()
+    const selectedOrgId = useSelector((state: RootState) => state.organization.selectedOrgId)
 
     const handleSelect = (org: Organization) => {
         setSelectedOrg(org);
         setSearchQuery('');
         dispatch(setOrganization(org))
-        localStorage.setItem('organizationId', org.id.toString())
+        localStorage.setItem('organizationId', org.id)
+        localStorage.setItem('organizationSlug', org.slug)
     }
 
     const navigate = useNavigate()
@@ -38,7 +41,6 @@ const ChooseOrganization = () => {
 
 
         try{
-           // await selectOrganization(selectedOrg.id)
             navigate('/login')
         } catch(error){
             console.error('Ошибка: ', error)
@@ -57,15 +59,28 @@ const ChooseOrganization = () => {
         }
     }, [isOpen])
     useEffect(() => {
-        const savedId = localStorage.getItem('organizationId')
-        if (savedId && organizations) {
-            const savedOrg = organizations.find(org => org.id === parseInt(savedId))
+        if (selectedOrgId && organizations) {
+            const savedOrg = organizations.find(org => org.id === selectedOrgId)
             if (savedOrg) {
                 setSelectedOrg(savedOrg)
                 dispatch(setOrganization(savedOrg))
             }
         }
-    }, [organizations])
+    }, [selectedOrgId, organizations, dispatch])
+
+    useEffect(() => {
+        dispatch(setOrganizationLoading(isLoading))
+    }, [isLoading, dispatch])
+
+    useEffect(() => {
+        if (!error) {
+            dispatch(setOrganizationError(null))
+            return
+        }
+
+        const message = error instanceof Error ? error.message : 'Ошибка загрузки организаций'
+        dispatch(setOrganizationError(message))
+    }, [error, dispatch])
 
     if(isLoading) return (
         <Wrapper>
@@ -122,6 +137,9 @@ const ChooseOrganization = () => {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     setSelectedOrg(null);
+                                    dispatch(clearOrganization())
+                                    localStorage.removeItem('organizationId')
+                                    localStorage.removeItem('organizationSlug')
                                 }}
                                 role="button"
                                 aria-label="Сбросить выбор"

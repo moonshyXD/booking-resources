@@ -52,6 +52,9 @@ class CompanyRepositoryPostgres:
         if company_db is None:
             return None
 
+        if company_db.name != new_company.name or company_db.slug != new_company.slug:
+            return None
+
         new_company_data = self._validate_company_data(new_company)
 
         for key, value in new_company_data.items():

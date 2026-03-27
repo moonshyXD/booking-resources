@@ -24,15 +24,20 @@ class UserRepositoryPostgres:
             company_query = select(CompanyDB).where(CompanyDB.id == user.company_id)
             company_result = await self.session.execute(company_query)
             company_db = company_result.scalar_one_or_none()
-            
+
             if company_db is None:
                 return None
-            
+
         user_data = self._validate_user_data(user)
 
-        query = select(UserDB).where(UserDB.email == user.email)
+        query = select(UserDB).where(
+            UserDB.email == user.email,
+            UserDB.company_id == user.company_id
+        )
+
         result = await self.session.execute(query)
         existing_user = result.scalar_one_or_none()
+
         if existing_user is not None:
             return None
 

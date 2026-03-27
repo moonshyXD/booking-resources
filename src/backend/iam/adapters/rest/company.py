@@ -34,7 +34,10 @@ async def add_company(
     domain_company = Company(name=company.name, slug=company.slug, is_active=company.is_active)
     result = await service.add_company(domain_company)
     if result is None:
-        raise HTTPException(status_code=409, detail="Компания уже есть в базе")
+        raise HTTPException(
+            status_code=409,
+            detail="Ошибка создания компании. Заполните все поля и проверьте правильность ввёдённого названия, слага и статуса компании"
+        )
     return result
 
 @router.delete(
@@ -64,5 +67,9 @@ async def update_company(
     domain_company = Company(name=new_company.name, slug=new_company.slug, is_active=new_company.is_active)
     result = await service.update_company(company_id, domain_company)
     if result is None:
-        raise HTTPException(status_code=404, detail="Компания не найдена")
+        raise HTTPException(
+            status_code=404,
+            detail="Компания не найдена или вы попытались изменить название на существующую компанию"
+        )
+
     return result

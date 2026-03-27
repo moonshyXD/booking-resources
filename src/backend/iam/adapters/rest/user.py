@@ -23,7 +23,7 @@ def map_to_domain_user(request_data: BaseUserRequest, password_hash: str, role: 
     return User(
         company_id=company_id, email=request_data.email, password_hash=password_hash,
         first_name=request_data.first_name, last_name=request_data.last_name,
-        avatar_url=request_data.avatar_url, role=role, is_active=True
+        avatar_url="", role=role, is_active=True
     )
 
 
@@ -48,7 +48,10 @@ async def add_user(
     domain_user = map_to_domain_user(user, "", UserRole.USER, user.company_id)
     result = await service.add_user(domain_user)
     if result is None:
-        raise HTTPException(status_code=409, detail="Ошибка создания пользователя")
+        raise HTTPException(
+            status_code=409,
+            detail="Ошибка создания пользователя. Заполните все поля и проверьте правильность ввёдённого логина, пароля и адреса почты"
+        )
 
     return result
 
@@ -70,7 +73,7 @@ async def add_company_admin(
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Пользователь уже есть в базе или указана несуществующая компания"
+            detail="Ошибка создания пользователя. Заполните все поля и проверьте правильность ввёдённого логина, пароля и адреса почты"
         )
 
     return result

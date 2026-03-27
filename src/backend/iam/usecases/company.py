@@ -6,6 +6,9 @@ class CompanyService:
         self.repository = repository
 
     async def add_company(self, company: Company):
+        if company.name == "" or company.slug == "" or company.is_active == "":
+            return None
+
         request = await self.repository.add_company(company)
         if request is None:
             return None

@@ -7,7 +7,6 @@ class BaseUserRequest(BaseModel):
     email: EmailStr
     first_name: str | None = None
     last_name: str | None = None
-    avatar_url: str | None = None
 
 
 class CreateUserRequest(BaseUserRequest):
